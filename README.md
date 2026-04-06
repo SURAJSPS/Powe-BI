@@ -8,6 +8,7 @@ Documentation and phased specs for civil operations on **Microsoft Dataverse**, 
 | Phase 1 (deep guide) | [docs/phase-1/STEP-BY-STEP-DEEP-GUIDE.md](docs/phase-1/STEP-BY-STEP-DEEP-GUIDE.md) |
 | **Git + Power Platform** (overview) | [docs/GIT-AND-POWER-PLATFORM.md](docs/GIT-AND-POWER-PLATFORM.md) |
 | **`pac` unpack / pack** (full walkthrough) | [docs/PAC-SOLUTION-GUIDE.md](docs/PAC-SOLUTION-GUIDE.md) |
+| **Power Apps web portal** (export/import, Solutions — browser only) | [docs/POWER-APPS-WEB-PORTAL.md](docs/POWER-APPS-WEB-PORTAL.md) |
 
 ---
 
