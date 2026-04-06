@@ -1,0 +1,32 @@
+# OS
+.DS_Store
+Thumbs.db
+
+# Editors
+.idea/
+.vscode/
+*.swp
+*.swo
+
+# Secrets — never commit tokens or connection strings
+*.pfx
+*.pem
+secrets.json
+local.settings.json
+**/AuthProfiles/
+
+# Power Platform CLI (pac) — local auth profiles may appear under user dir;
+# if you store pac output in-repo, ignore unpacked temp or keep solutions/ tracked intentionally
+# Uncomment if you use a local `pac` folder for secrets:
+# .pac/
+
+# Exported solution zips (optional: large binaries — prefer Git LFS or artifact storage)
+# Uncomment to exclude exported zips from Git:
+# *.zip
+
+# Logs
+*.log
+npm-debug.log*
+
+# Node (if you add tools later)
+node_modules/
