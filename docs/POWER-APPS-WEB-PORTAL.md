@@ -41,16 +41,30 @@ Use **[https://make.powerapps.com](https://make.powerapps.com)** for almost all 
 
 Do this **after** you **publish** all changes.
 
-1. **Solutions** (left nav).
-2. Select **RNK Civil Core** (single click the row — do not open it yet if your UI uses a toolbar on selection).
-3. Top command bar → **Export** (or open the solution → **Export** in the command bar).
+### 3.1 Where **Export** actually is (common confusion)
+
+- **Wrong place:** Inside **RNK Civil Core** → **Tables**, the toolbar may show **Export**, but it is often **grayed out** or not the same as “export whole solution as `.zip`” — especially when **Tables (0)** and the solution is still empty.
+- **Right place:** Go to the **Solutions list** first, then export the **solution package**.
+
+**Steps:**
+
+1. Left navigation → **Solutions** (click the word **Solutions**, not a sub-item).
+2. You should see a **list** of solutions (rows), including **RNK Civil Core**.
+3. **Single-click** the row **RNK Civil Core** to select it **without** opening it — or some UIs use a checkbox on the row.
+4. Look at the **command bar above the grid** (same level as **New solution** / **Refresh**) → **Export** or **Export solution**.
+
+If you already **opened** the solution (breadcrumb `RNK Civil Core > Tables`), use **← Back** or click **Solutions** in the left nav again to return to the **list**, then select **RNK Civil Core** and use **Export**.
+
+**Note:** Exporting an **empty** solution (0 tables) may still be allowed from the **Solutions list** — useful for backup of the shell — but usually you add tables first, then **Publish all customizations**, then export.
+
+### 3.2 Export wizard (after you click **Export**)
 
 **In the export wizard:**
 
 - Choose **Unmanaged** for development / copying to another dev / later use with `pac` unpack.  
 - Choose **Managed** only if your admin says so (often for **production** deployment).
 
-4. Wait until the package is ready → **Download** the `.zip` file.
+Wait until the package is ready → **Download** the `.zip` file.
 
 **Save** the file somewhere safe (Downloads is fine). This zip is what you can:
 
