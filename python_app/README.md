@@ -41,6 +41,7 @@ Edit **`.env`** in the **repository root**:
 | `MONGODB_DATABASE` | No | Database name (default `rnk_civil` if omitted) |
 | `MONGODB_APP_NAME` | No | e.g. `Cluster0` |
 | `MONGODB_AUTH_SOURCE` | No | e.g. `admin` |
+| `MONGODB_AUTH_MECHANISM` | No | Optional; e.g. SCRAM (same as Node if you use it) |
 | `MONGODB_URI` / `MONGO_URI` | alt | Full URI instead of split fields |
 
 \* Or set a single **`MONGODB_URI`** / **`MONGO_URI`** instead of username/password/cluster. Other aliases (`MONGO_USER`, `MONGO_HOST`, …) still work if you prefer them.
