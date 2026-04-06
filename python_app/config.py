@@ -28,18 +28,21 @@ def _get(key: str, default: str | None = None) -> str | None:
 
 
 def _mongo_uri_from_parts() -> str | None:
-    """Build Atlas-style URI from MONGO_USER, MONGO_PASSWORD, MONGO_HOST, etc."""
-    user = _get("MONGO_USER")
-    password = _get("MONGO_PASSWORD")
-    host = _get("MONGO_HOST")
+    """Build Atlas-style URI from split env vars.
+
+    Supports **RNK / Streamlit** names (`MONGO_*`) and **Node / Tepo-style** names (`MONGODB_*`).
+    """
+    user = _get("MONGO_USER") or _get("MONGODB_USERNAME")
+    password = _get("MONGO_PASSWORD") or _get("MONGODB_PASSWORD")
+    host = _get("MONGO_HOST") or _get("MONGODB_CLUSTER")
     if not user or not password or not host:
         return None
-    scheme = _get("MONGO_SCHEME", "mongodb+srv") or "mongodb+srv"
+    scheme = _get("MONGO_SCHEME") or _get("MONGODB_SCHEME") or "mongodb+srv"
     qs: list[str] = []
-    app = _get("MONGO_APP_NAME")
+    app = _get("MONGO_APP_NAME") or _get("MONGODB_APP_NAME")
     if app:
         qs.append(f"appName={quote_plus(app)}")
-    auth_src = _get("MONGO_AUTH_SOURCE")
+    auth_src = _get("MONGO_AUTH_SOURCE") or _get("MONGODB_AUTH_SOURCE")
     if auth_src:
         qs.append(f"authSource={quote_plus(auth_src)}")
     qs.append("retryWrites=true")
@@ -51,12 +54,17 @@ def _mongo_uri_from_parts() -> str | None:
 def get_mongo_uri() -> str | None:
     """Resolve connection string after refreshing env (use this instead of a static constant)."""
     refresh_env()
-    return _get("MONGO_URI") or _get("MONGODB_URI") or _mongo_uri_from_parts()
+    return (
+        _get("MONGO_URI")
+        or _get("MONGODB_URI")
+        or _get("MONGODB_URL")
+        or _mongo_uri_from_parts()
+    )
 
 
 def get_mongo_db_name() -> str:
     refresh_env()
-    return _get("MONGO_DB_NAME", "rnk_civil") or "rnk_civil"
+    return _get("MONGO_DB_NAME") or _get("MONGODB_DATABASE") or "rnk_civil"
 
 
 # Back-compat: values at import time (prefer get_mongo_uri() in new code).

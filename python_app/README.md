@@ -10,12 +10,22 @@ Browser app with **company onboarding**, **users**, **employees**, **clients**, 
 
 ## Environment variables
 
-Create a **`.env`** file in the **repository root** (same folder as `.env.example`):
+Create a **`.env`** file in the **repository root** (see comments inside that file for all variables):
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `MONGO_URI` | **Yes** | Connection string (e.g. Atlas `mongodb+srv://...`) |
-| `MONGO_DB_NAME` | No | Database name (default: `rnk_civil`) |
+| `MONGO_URI` / `MONGODB_URI` / `MONGODB_URL` | Yes* | Full connection string (first non-empty wins) |
+| `MONGO_USER` / `MONGODB_USERNAME` | Yes* | Database user |
+| `MONGO_PASSWORD` / `MONGODB_PASSWORD` | Yes* | Database password |
+| `MONGO_HOST` / `MONGODB_CLUSTER` | Yes* | Host only, e.g. `cluster0.xxxxx.mongodb.net` |
+| `MONGO_DB_NAME` / `MONGODB_DATABASE` | No | Database name (default `rnk_civil`) |
+| `MONGO_APP_NAME` / `MONGODB_APP_NAME` | No | e.g. `Cluster0` |
+| `MONGO_AUTH_SOURCE` / `MONGODB_AUTH_SOURCE` | No | e.g. `admin` |
+| `MONGO_SCHEME` / `MONGODB_SCHEME` | No | Default `mongodb+srv` |
+
+\* Either a full URI **or** split fields (`MONGO_*` **or** the `MONGODB_*` names used by your Node API).
+
+JWT, `PORT`, `CORS`, etc. are **not** used by this Streamlit app.
 
 Never commit `.env` or real credentials.
 
