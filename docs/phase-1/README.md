@@ -16,6 +16,7 @@
 | **[STEP-BY-STEP-DEEP-GUIDE.md](./STEP-BY-STEP-DEEP-GUIDE.md)** | **Full click-by-click walkthrough** (parts A–L): environment, publisher, solution, choices, each table, forms, subgrid, business rules, app, security, test data, Power BI |
 | [DATAVERSE-SCHEMA.md](./DATAVERSE-SCHEMA.md) | Table names, fields, types, relationships, choice values |
 | [IMPLEMENTATION-STEPS.md](./IMPLEMENTATION-STEPS.md) | Short ordered checklist (same flow, less detail) |
+| [../GIT-AND-POWER-PLATFORM.md](../GIT-AND-POWER-PLATFORM.md) | **Git** remote, branches, `pac` unpack/pack, solution export/import |
 
 ## Publisher prefix
 
