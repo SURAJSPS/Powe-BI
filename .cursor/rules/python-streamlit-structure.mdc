@@ -1,0 +1,101 @@
+---
+description: Python Streamlit app layout, layers, system design, and where to add code (RNK Civil)
+globs: app.py,config.py,models.py,database.py,core/**/*.py,db/**/*.py,services/**/*.py,ui/**/*.py,tests/**/*.py,.streamlit/**/*
+alwaysApply: false
+---
+
+# Python app — project structure and system design
+
+The Streamlit app lives at the **repository root** (`app.py`, `core/`, `services/`, `ui/`, …). Use this as the single map for **architecture**, **layering**, and **where new code belongs**.
+
+## High-level architecture
+
+```mermaid
+flowchart TB
+  subgraph presentation["Presentation"]
+    app["app.py"]
+    pages["ui/pages/*"]
+    theme["ui/theme/*"]
+  end
+  subgraph application["Application"]
+    services["services/*"]
+  end
+  subgraph crosscut["Cross-cutting"]
+    core["core/*"]
+    config["config.py"]
+  end
+  subgraph data["Data access"]
+    mongo["db/mongo.py"]
+    sql["database.py + models.py"]
+  end
+  app --> pages
+  app --> core
+  pages --> services
+  pages --> theme
+  pages --> core
+  services --> mongo
+  services --> sql
+  mongo --> config
+  sql --> config
+```
+
+**Dependency direction (always):** `ui/pages` → `services` → `db` / `database` → `config`. `core` is imported by `app`, pages, and services where needed; **do not** import `ui` from `services` or `db`.
+
+## Directory roles
+
+| Area | Responsibility |
+|------|----------------|
+| **`app.py`** | Entry only: `st.set_page_config`, auth gate, cookie restore, dispatch to current page. No large forms or business rules. |
+| **`config.py`** | Environment and secrets loading. No UI. |
+| **`db/`** | **MongoDB** — client, indexes, low-level access. No Streamlit imports. |
+| **`database.py`**, **`models.py`** | **SQLite + SQLAlchemy** — engine/session, ORM models, seeds. Used where the app still relies on relational data; keep SQLAlchemy types here, not scattered. |
+| **`services/`** | Application logic (validation, orchestration, calls into `db` / `database`). Return plain data structures; avoid `st` except in a dedicated UI-facing helper if unavoidable. |
+| **`core/`** | Cross-cutting: roles/RBAC, password hashing, session signing, security helpers. No page-specific UI. |
+| **`ui/theme/`** | Global CSS (`layout.py`: `inject_theme`, `inject_auth_layout`) and small reusable HTML helpers (`components.py`). No page-specific workflows. |
+| **`ui/pages/`** | One module per domain (`clients.py`, `field_ops.py`, …). Shared session helpers in `common.py`. **Routing** — `PAGE_FUNCS`, sidebar, URL query params — **only** in `nav.py`. |
+| **`tests/`** | Unit/integration tests; mirror package names under `tests/` (e.g. `tests/services/…`) or keep flat with clear `test_*.py` names. Prefer testing `services` and pure helpers; UI smoke tests optional. |
+| **`.streamlit/`** | `config.toml` — theme, server options. Do not put secrets here. |
+| **`data/`** | Local DB files (e.g. SQLite path used by `database.py`). Gitignore if environment-specific. |
+| **Root** | `requirements.txt`, `README.md`, `.env` (not committed). Optional `pyproject.toml` / tooling config as the project grows. |
+
+## Layers (detail)
+
+1. **`app.py`** — Thin shell; no domain logic.
+2. **`config.py`** — Single place for env; document new variables in `README` when adding them.
+3. **`db/`** — Mongo only; connection helpers and collection access patterns.
+4. **`database.py` + `models.py`** — Relational schema and sessions; when adding tables, update models first, then migrations/seeds if you introduce Alembic later.
+5. **`services/`** — The **use-case** layer: “create client”, “validate payroll”, etc.
+6. **`core/`** — Authz/authn primitives shared across pages.
+7. **`ui/theme/`** — Look-and-feel and reusable chrome.
+8. **`ui/pages/`** — Screens; call `services`, not raw DB, for anything non-trivial.
+
+## System design rules
+
+- **Two data backends:** Be explicit in code and PRs whether a change touches **Mongo** (`db/`) or **SQLite/SQLAlchemy** (`database.py`, `models.py`). Do not duplicate domain rules across both without a clear reason.
+- **No circular imports:** `nav.py` imports page modules; **page modules must not import `nav`**.
+- **Secrets:** Only via `config` / env (`.env` at repo root). Never hardcode credentials; never commit `.env`.
+- **Errors:** Services should raise meaningful exceptions or return result types; pages catch and show `st.error` / empty states as appropriate.
+- **Logging:** Use the standard `logging` module in `services` / `db` for operational messages; avoid `print` in production paths.
+- **Types:** Prefer type hints on public service functions and complex helpers; keeps contracts clear between layers.
+- **Files ~400–500+ lines:** Split by domain or extract to `common.py` / `ui/theme/components.py`.
+
+## Rules when implementing
+
+- **New screen or major section** — Add `page_<name>(u: dict) -> None` in the right `ui/pages/` module; register in `nav.py` (`PAGE_FUNCS`) and **`core/roles.py`** if access rules apply.
+- **Reuse** theme helpers before new inline HTML; extend `components.py` if the same pattern appears twice.
+- **Naming** — `page_*` for top-level renderers in `PAGE_FUNCS`; prefix private helpers with `_`.
+- **Imports** — Pages may import `services`, `core.roles`, `ui.theme`, `ui.pages.common`.
+
+## Checklist (so nothing common is forgotten)
+
+- [ ] Right layer: UI vs service vs DB vs `core`?
+- [ ] New env var? → `config.py` + `README` env table.
+- [ ] New role or route? → `nav.py` + `core/roles.py`.
+- [ ] Mongo vs SQLAlchemy? → correct package (`db/` vs `models`/`database`).
+- [ ] Shared UI snippet used twice? → `ui/theme/components.py`.
+- [ ] Tests for new service logic? → `tests/` with realistic inputs.
+- [ ] No secret or PII in logs or repo.
+
+## Running
+
+From the repository root: `streamlit run app.py`. The repo root `.env` supplies MongoDB settings (see `README.md`).
