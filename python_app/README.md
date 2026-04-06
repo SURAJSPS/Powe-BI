@@ -10,13 +10,17 @@ Browser app with **company onboarding**, **users**, **employees**, **clients**, 
 
 ## One `.env` file (single source of truth)
 
-Use **one** file only: **`<repository-root>/.env`** (same folder as `README.md` / `.env.example`).
+Use **one** file only: **`<repository-root>/.env`** (same folder as this repo’s `README.md`).
 
-**First time:** copy the template and edit:
+Create **`Powe-BI/.env`** yourself (it is not in Git). Add your Mongo variables — for example:
 
-```bash
-cp .env.example .env
-# Edit .env — set MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_CLUSTER, MONGODB_DATABASE, etc.
+```env
+MONGODB_USERNAME=your_atlas_user
+MONGODB_PASSWORD=your_password
+MONGODB_CLUSTER=cluster0.xxxxx.mongodb.net
+MONGODB_DATABASE=tepo
+MONGODB_APP_NAME=Cluster0
+MONGODB_AUTH_SOURCE=admin
 ```
 
 Put **Mongo** variables there for this Streamlit app **and** you can keep your **Node API** variables (`PORT`, `JWT_*`, `CORS`, etc.) in that **same** file. The Python app reads only the Mongo-related keys; it ignores the rest.
@@ -27,20 +31,19 @@ Do **not** maintain a second `.env` inside `python_app/` — everything loads fr
 
 **You do not need any extra env vars** for Streamlit beyond a working Mongo connection. If your `.env` already has `MONGODB_USERNAME`, `MONGODB_PASSWORD`, `MONGODB_CLUSTER`, `MONGODB_DATABASE`, and optionally `MONGODB_APP_NAME` / `MONGODB_AUTH_SOURCE`, that is enough — no separate “app secrets” or JWT variables are required for this Python UI.
 
-Create or edit **`.env`** in the **repository root** (see `.env.example`):
+Edit **`.env`** in the **repository root**:
 
 | Variable | Required | Description |
 |----------|----------|-------------|
-| `MONGO_URI` / `MONGODB_URI` / `MONGODB_URL` | Yes* | Full connection string (first non-empty wins) |
-| `MONGO_USER` / `MONGODB_USERNAME` | Yes* | Database user |
-| `MONGO_PASSWORD` / `MONGODB_PASSWORD` | Yes* | Database password |
-| `MONGO_HOST` / `MONGODB_CLUSTER` | Yes* | Host only, e.g. `cluster0.xxxxx.mongodb.net` |
-| `MONGO_DB_NAME` / `MONGODB_DATABASE` | No | Database name (default `rnk_civil`) |
-| `MONGO_APP_NAME` / `MONGODB_APP_NAME` | No | e.g. `Cluster0` |
-| `MONGO_AUTH_SOURCE` / `MONGODB_AUTH_SOURCE` | No | e.g. `admin` |
-| `MONGO_SCHEME` / `MONGODB_SCHEME` | No | Default `mongodb+srv` |
+| `MONGODB_USERNAME` | Yes* | Atlas database user |
+| `MONGODB_PASSWORD` | Yes* | That user’s password |
+| `MONGODB_CLUSTER` | Yes* | Host only, e.g. `cluster0.xxxxx.mongodb.net` |
+| `MONGODB_DATABASE` | No | Database name (default `rnk_civil` if omitted) |
+| `MONGODB_APP_NAME` | No | e.g. `Cluster0` |
+| `MONGODB_AUTH_SOURCE` | No | e.g. `admin` |
+| `MONGODB_URI` / `MONGO_URI` | alt | Full URI instead of split fields |
 
-\* Either a full URI **or** split fields (`MONGO_*` **or** the `MONGODB_*` names used by your Node API).
+\* Or set a single **`MONGODB_URI`** / **`MONGO_URI`** instead of username/password/cluster. Other aliases (`MONGO_USER`, `MONGO_HOST`, …) still work if you prefer them.
 
 JWT, `PORT`, `CORS`, etc. are **not** used by this Streamlit app.
 

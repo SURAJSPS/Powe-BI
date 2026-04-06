@@ -28,8 +28,8 @@ def get_client() -> MongoClient:
     uri = get_mongo_uri()
     if not uri:
         raise RuntimeError(
-            "MongoDB is not configured. Set MONGO_URI or MONGO_USER, MONGO_PASSWORD, "
-            "and MONGO_HOST in the project root `.env`."
+            "MongoDB is not configured. In the project root `.env`, set either `MONGODB_URI` "
+            "or `MONGODB_USERNAME`, `MONGODB_PASSWORD`, and `MONGODB_CLUSTER` (plus `MONGODB_DATABASE`)."
         )
     if _client is not None and _uri_bound == uri:
         return _client
@@ -62,7 +62,8 @@ def diagnose() -> tuple[bool, str | None]:
     if not uri:
         return (
             False,
-            "Set `MONGO_USER`, `MONGO_PASSWORD`, and `MONGO_HOST` (or a full `MONGO_URI`) in the project root `.env`.",
+            "In the project root `.env`, set `MONGODB_USERNAME`, `MONGODB_PASSWORD`, `MONGODB_CLUSTER`, "
+            "and `MONGODB_DATABASE` — or one full `MONGODB_URI` / `MONGO_URI` string.",
         )
     try:
         get_client().admin.command("ping")
@@ -72,9 +73,9 @@ def diagnose() -> tuple[bool, str | None]:
         if _auth_failure_message(e):
             return (
                 False,
-                "**Authentication failed.** In MongoDB Atlas open **Database Access**, confirm the "
-                "username matches `MONGO_USER`, then **Edit** the user and set a new password. "
-                "Put that password in `MONGO_PASSWORD` in `.env`, save, and restart Streamlit.",
+                "**Authentication failed.** In Atlas → **Database Access**, the user must match "
+                "`MONGODB_USERNAME` in your `.env`. **Edit** that user and set a new password, "
+                "put it in `MONGODB_PASSWORD`, save `.env`, and restart Streamlit.",
             )
         return False, f"MongoDB error: `{e}`"
     except ServerSelectionTimeoutError:
@@ -82,7 +83,7 @@ def diagnose() -> tuple[bool, str | None]:
         return (
             False,
             "**Cannot reach the cluster.** In Atlas → **Network Access**, add your current IP "
-            "(or `0.0.0.0/0` for testing). Check `MONGO_HOST` matches **Connect → Drivers**.",
+            "(or `0.0.0.0/0` for testing). Check `MONGODB_CLUSTER` matches **Connect → Drivers**.",
         )
     except PyMongoError as e:
         invalidate_client()
@@ -90,7 +91,7 @@ def diagnose() -> tuple[bool, str | None]:
             return (
                 False,
                 "**Authentication failed.** Reset the database user password in Atlas → **Database Access**, "
-                "update `MONGO_PASSWORD` (or your full `MONGO_URI`) in `.env`, save, and restart Streamlit.",
+                "update `MONGODB_PASSWORD` (or your full URI) in `.env`, save, and restart Streamlit.",
             )
         return False, str(e)
 

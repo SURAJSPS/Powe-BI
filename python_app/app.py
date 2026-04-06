@@ -89,12 +89,12 @@ def main() -> None:
             """
 **Checklist**
 
-1. `.env` in the project root with `MONGO_USER`, `MONGO_PASSWORD`, `MONGO_HOST` (or `MONGO_URI`).
-2. Password matches **Atlas → Database Access** for that user (reset there if unsure).
+1. Project root **`.env`** with **`MONGODB_USERNAME`**, **`MONGODB_PASSWORD`**, **`MONGODB_CLUSTER`**, **`MONGODB_DATABASE`** (and optional `MONGODB_APP_NAME`, `MONGODB_AUTH_SOURCE`) — or a single **`MONGODB_URI`** / **`MONGO_URI`**.
+2. Username/password match **Atlas → Database Access** (reset password there if unsure).
 3. **Atlas → Network Access** allows your IP.
-4. Restart Streamlit after changing `.env`.
+4. Restart Streamlit after saving `.env`.
 
-Do not commit real credentials to Git.
+Do not commit `.env` to Git.
             """
         )
         return

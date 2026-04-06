@@ -13,7 +13,7 @@
 | Service | Required | Note |
 |---------|----------|------|
 | **MongoDB** | Yes | Atlas (recommended) or self-hosted; replica set optional |
-| Connection | `MONGO_URI` or split vars | See repository root `.env` |
+| Connection | `MONGODB_*` or `MONGO_URI` | See repository root `.env` (not committed) |
 
 ## Python packages
 
@@ -28,16 +28,21 @@ Install from `python_app/requirements.txt`:
 
 ## Environment variables
 
+Configure **`Powe-BI/.env`** (single file; no `.env.example` in repo).
+
 | Variable | Required | Example |
 |----------|----------|---------|
-| `MONGO_URI` | Use this **or** split vars | Full string from Atlas **Connect → Drivers** |
-| `MONGO_USER` | If no URI | Database username (Atlas **Database Access**) |
-| `MONGO_PASSWORD` | If no URI | Must match that user’s password in Atlas |
-| `MONGO_HOST` | If no URI | Host only, e.g. `cluster0.xxxxx.mongodb.net` |
-| `MONGO_SCHEME` | No | Default `mongodb+srv` |
-| `MONGO_DB_NAME` | No | `rnk_civil` |
+| `MONGODB_USERNAME` | Yes* | Atlas database user |
+| `MONGODB_PASSWORD` | Yes* | Must match **Database Access** |
+| `MONGODB_CLUSTER` | Yes* | Host only, e.g. `cluster0.xxxxx.mongodb.net` |
+| `MONGODB_DATABASE` | No | e.g. `tepo` (default `rnk_civil` if unset) |
+| `MONGODB_APP_NAME` | No | e.g. `Cluster0` |
+| `MONGODB_AUTH_SOURCE` | No | e.g. `admin` |
+| `MONGODB_URI` / `MONGO_URI` | alt | Full URI instead of split fields |
 
-**Authentication failed:** reset the user password in **Atlas → Database Access**, update `MONGO_PASSWORD` (or full `MONGO_URI`), save `.env`, restart Streamlit. With split variables, special characters in the password are URL-encoded automatically.
+\* Or one full URI instead of username/password/cluster.
+
+**Authentication failed:** reset password in Atlas → **Database Access**, update `MONGODB_PASSWORD`, save `.env`, restart Streamlit. Passwords with special characters are URL-encoded when using split variables.
 
 **Cannot reach cluster:** **Atlas → Network Access** → allow your IP (or `0.0.0.0/0` for testing).
 
