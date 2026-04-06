@@ -3,24 +3,100 @@ from __future__ import annotations
 
 from pymongo import ASCENDING, MongoClient
 from pymongo.database import Database
-from pymongo.errors import PyMongoError
+from pymongo.errors import OperationFailure, PyMongoError, ServerSelectionTimeoutError
 
-from config import MONGO_DB_NAME, MONGO_URI
+from config import get_mongo_db_name, get_mongo_uri
 
 _client: MongoClient | None = None
+_uri_bound: str | None = None
+
+
+def invalidate_client() -> None:
+    """Close pooled client (e.g. after auth failure or URI change)."""
+    global _client, _uri_bound
+    if _client is not None:
+        try:
+            _client.close()
+        except Exception:
+            pass
+    _client = None
+    _uri_bound = None
 
 
 def get_client() -> MongoClient:
-    global _client
-    if _client is None:
-        if not MONGO_URI:
-            raise RuntimeError("MONGO_URI is not set. Add it to .env (see .env.example).")
-        _client = MongoClient(MONGO_URI, serverSelectionTimeoutMS=8000)
+    global _client, _uri_bound
+    uri = get_mongo_uri()
+    if not uri:
+        raise RuntimeError(
+            "MongoDB is not configured. Set MONGO_URI or MONGO_USER, MONGO_PASSWORD, "
+            "and MONGO_HOST in the project root `.env`."
+        )
+    if _client is not None and _uri_bound == uri:
+        return _client
+    invalidate_client()
+    _client = MongoClient(uri, serverSelectionTimeoutMS=8000)
+    _uri_bound = uri
     return _client
 
 
+def _auth_failure_message(e: BaseException) -> bool:
+    msg = str(e).lower()
+    if any(
+        x in msg
+        for x in (
+            "bad auth",
+            "authentication failed",
+            "unable to authenticate",
+            "invalid credentials",
+            "scram",
+        )
+    ):
+        return True
+    code = getattr(e, "code", None)
+    return code in (18, 8000)
+
+
+def diagnose() -> tuple[bool, str | None]:
+    """Try to connect and ping; return (ok, user-facing error markdown or None)."""
+    uri = get_mongo_uri()
+    if not uri:
+        return (
+            False,
+            "Set `MONGO_USER`, `MONGO_PASSWORD`, and `MONGO_HOST` (or a full `MONGO_URI`) in the project root `.env`.",
+        )
+    try:
+        get_client().admin.command("ping")
+        return True, None
+    except OperationFailure as e:
+        invalidate_client()
+        if _auth_failure_message(e):
+            return (
+                False,
+                "**Authentication failed.** In MongoDB Atlas open **Database Access**, confirm the "
+                "username matches `MONGO_USER`, then **Edit** the user and set a new password. "
+                "Put that password in `MONGO_PASSWORD` in `.env`, save, and restart Streamlit.",
+            )
+        return False, f"MongoDB error: `{e}`"
+    except ServerSelectionTimeoutError:
+        invalidate_client()
+        return (
+            False,
+            "**Cannot reach the cluster.** In Atlas → **Network Access**, add your current IP "
+            "(or `0.0.0.0/0` for testing). Check `MONGO_HOST` matches **Connect → Drivers**.",
+        )
+    except PyMongoError as e:
+        invalidate_client()
+        if _auth_failure_message(e):
+            return (
+                False,
+                "**Authentication failed.** Reset the database user password in Atlas → **Database Access**, "
+                "update `MONGO_PASSWORD` (or your full `MONGO_URI`) in `.env`, save, and restart Streamlit.",
+            )
+        return False, str(e)
+
+
 def get_db() -> Database:
-    return get_client()[MONGO_DB_NAME]
+    return get_client()[get_mongo_db_name()]
 
 
 def ping() -> bool:

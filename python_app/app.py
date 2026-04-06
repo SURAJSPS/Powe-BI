@@ -2,7 +2,7 @@
 RNK Civil — Streamlit app (MongoDB + role-based access).
 
 Run from `python_app/`:  streamlit run app.py
-Requires `.env` with MONGO_URI (see ../.env.example).
+Requires `.env` in the project root (MongoDB variables — see that file).
 """
 from __future__ import annotations
 
@@ -15,7 +15,7 @@ if str(_APP_DIR) not in sys.path:
 
 import streamlit as st
 
-from config import MONGO_URI
+from config import get_mongo_uri
 from db import mongo
 from services import auth_service
 from ui.pages_main import PAGE_FUNCS, sidebar_nav
@@ -25,16 +25,11 @@ st.set_page_config(page_title="RNK Civil", layout="wide", initial_sidebar_state=
 
 
 @st.cache_resource
-def _init_mongo() -> bool:
-    if not MONGO_URI:
-        return False
-    try:
-        if not mongo.ping():
-            return False
-        mongo.ensure_indexes()
-        return True
-    except Exception:
-        return False
+def _ensure_indexes_cached(uri: str) -> None:
+    """Run once per connection string after a successful ping."""
+    if not uri:
+        return
+    mongo.ensure_indexes()
 
 
 def _logout() -> None:
@@ -85,19 +80,26 @@ def _auth_screen() -> None:
 def main() -> None:
     inject_theme()
 
-    if not _init_mongo():
+    ok, detail = mongo.diagnose()
+    if not ok:
         st.error("MongoDB is not configured or unreachable.")
+        if detail:
+            st.markdown(detail)
         st.markdown(
             """
-1. Create a `.env` file in the project root (see `.env.example`).
-2. Set `MONGO_URI` to your Atlas connection string (or self-hosted Mongo).
-3. Optionally set `MONGO_DB_NAME` (default `rnk_civil`).
-4. Restart the app.
+**Checklist**
 
-**Security:** never commit real credentials to Git.
+1. `.env` in the project root with `MONGO_USER`, `MONGO_PASSWORD`, `MONGO_HOST` (or `MONGO_URI`).
+2. Password matches **Atlas → Database Access** for that user (reset there if unsure).
+3. **Atlas → Network Access** allows your IP.
+4. Restart Streamlit after changing `.env`.
+
+Do not commit real credentials to Git.
             """
         )
         return
+
+    _ensure_indexes_cached(get_mongo_uri() or "")
 
     if "user" not in st.session_state:
         _auth_screen()
