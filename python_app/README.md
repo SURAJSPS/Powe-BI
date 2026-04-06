@@ -12,6 +12,13 @@ Browser app with **company onboarding**, **users**, **employees**, **clients**, 
 
 Use **one** file only: **`<repository-root>/.env`** (same folder as `README.md` / `.env.example`).
 
+**First time:** copy the template and edit:
+
+```bash
+cp .env.example .env
+# Edit .env — set MONGODB_USERNAME, MONGODB_PASSWORD, MONGODB_CLUSTER, MONGODB_DATABASE, etc.
+```
+
 Put **Mongo** variables there for this Streamlit app **and** you can keep your **Node API** variables (`PORT`, `JWT_*`, `CORS`, etc.) in that **same** file. The Python app reads only the Mongo-related keys; it ignores the rest.
 
 Do **not** maintain a second `.env` inside `python_app/` — everything loads from the repo root.
