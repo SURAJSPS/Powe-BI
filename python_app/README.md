@@ -1,19 +1,28 @@
-# RNK Civil — Python web app (Streamlit + SQLite)
+# RNK Civil — Python web app (Streamlit + MongoDB)
 
-Local **browser UI** for civil operations: master data, attendance, expenses, payroll helpers, invoices, dashboard.  
-Data is stored in **`data/rnk_civil.db`** at the **repository root** (created on first run).
+Browser app with **company onboarding**, **users**, **employees**, **clients**, **role-based access**, and civil operations modules (projects, workers, attendance, expenses, payroll, invoices).
 
 ## Requirements
 
-- Python **3.10+** recommended (3.9 may work).
-- Dependencies: `streamlit`, `sqlalchemy`, `pandas` (see `requirements.txt`).
+- Python **3.10+** recommended  
+- **MongoDB** (MongoDB Atlas or self-hosted)  
+- Dependencies: see `requirements.txt`
+
+## Environment variables
+
+Create a **`.env`** file in the **repository root** (same folder as `.env.example`):
+
+| Variable | Required | Description |
+|----------|----------|-------------|
+| `MONGO_URI` | **Yes** | Connection string (e.g. Atlas `mongodb+srv://...`) |
+| `MONGO_DB_NAME` | No | Database name (default: `rnk_civil`) |
+
+Never commit `.env` or real credentials.
 
 ## Install
 
-From the repo root (uses project `.venv` if you already have one):
-
 ```bash
-cd "/Users/surajsps/RNK INFRATECH/IT/Powe-BI"
+cd "/path/to/Powe-BI"
 python3 -m venv .venv
 . .venv/bin/activate
 pip install -r python_app/requirements.txt
@@ -22,34 +31,56 @@ pip install -r python_app/requirements.txt
 ## Run
 
 ```bash
-cd "/Users/surajsps/RNK INFRATECH/IT/Powe-BI/python_app"
+cd python_app
 streamlit run app.py
 ```
 
-Open the URL shown in the terminal (usually `http://localhost:8501`).
+Open the URL shown (usually `http://localhost:8501`).
 
-## What’s included
+## First-time flow
 
-| Area | Notes |
-|------|--------|
-| **OT rules, projects, sites, workers** | Forms + tables |
-| **Attendance, expenses** | Add rows; lists below |
-| **Payroll estimate** | Rough calculation from attendance + rates |
-| **Payroll runs / lines** | Manual journal-style lines (use with CA for statutory) |
-| **Invoices** | Simple header rows |
-| **Dashboard** | Counts + period expense total |
+1. **Create company** — company name + admin name + email + password.  
+2. **Sign in** with that email.  
+3. Add **OT rules**, **projects**, **sites**, **workers**, then **attendance** / **expenses**.  
+4. **Company admin** can invite more **app users** under **Team & employees** (tab “App users”).
 
-First launch **seeds** demo data if the database is empty.
+## Roles
 
-## Security
+| Role | Typical access |
+|------|----------------|
+| `company_admin` | All modules + user invites + company profile |
+| `manager` | Operations + payroll + invoices (no company settings) |
+| `finance` | Expenses, payroll, invoices, dashboard |
+| `site_ops` | Sites, workers, attendance, expenses |
+| `viewer` | Read-only dashboard / projects |
 
-- **No login** — use only on trusted machines / private network, or add auth later (e.g. reverse proxy + SSO).
-- Backup **`data/rnk_civil.db`** regularly.
+Exact page mapping is in `core/roles.py`.
 
-## Files
+## Data model
 
-| File | Role |
-|------|------|
-| `app.py` | Streamlit UI |
-| `models.py` | SQLAlchemy models |
-| `database.py` | SQLite path, `init_db`, seed |
+All operational data is scoped by **`company_id`** in MongoDB. Collections include: `companies`, `users`, `clients`, `employees`, `ot_rules`, `projects`, `sites`, `workers`, `attendance`, `expenses`, `payroll_runs`, `payroll_lines`, `invoices`.
+
+## Security notes
+
+- Passwords are stored as **bcrypt** hashes.  
+- **No row-level project ACL** yet — all users in a company see that company’s data; refine with `project_id` filters later if needed.  
+- Run behind **HTTPS** and restrict network access in production.
+
+## Project layout
+
+```
+python_app/
+  app.py              # Entry: Mongo check, auth, RBAC router
+  config.py           # Env loading
+  db/mongo.py         # Client, indexes
+  core/roles.py       # RBAC page map
+  core/security.py    # Password hashing
+  services/auth_service.py
+  services/civil_store.py
+  ui/theme.py
+  ui/pages_main.py    # Module screens
+```
+
+## Excel / Power Platform
+
+The **Excel** workbook and **Power Platform** docs in this repo are separate tracks; this app is **Mongo + Streamlit** only.

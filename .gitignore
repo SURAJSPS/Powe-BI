@@ -12,6 +12,7 @@ Thumbs.db
 *.pfx
 *.pem
 secrets.json
+.env
 local.settings.json
 **/AuthProfiles/
 
