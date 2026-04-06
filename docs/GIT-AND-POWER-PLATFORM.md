@@ -2,6 +2,9 @@
 
 This repo holds **documentation and specs**. Your **Dataverse solution** (tables, app) still lives in Power Platform; Git stores **versioned docs** and optionally **unpacked solution source** after you use the **Power Platform CLI (`pac`)**.
 
+**Step-by-step (`pac` export → unpack → branch → pack → import → security):**  
+→ **[PAC-SOLUTION-GUIDE.md](./PAC-SOLUTION-GUIDE.md)**
+
 ---
 
 ## 1. Initialize Git (once on your machine)

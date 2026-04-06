@@ -30,3 +30,6 @@ npm-debug.log*
 
 # Node (if you add tools later)
 node_modules/
+
+# Local pac pack output (optional — do not commit packed zips unless your team wants them)
+out/
