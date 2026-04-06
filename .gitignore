@@ -28,6 +28,9 @@ local.settings.json
 *.log
 npm-debug.log*
 
+# Python venv (Excel generator)
+.venv/
+
 # Node (if you add tools later)
 node_modules/
 
