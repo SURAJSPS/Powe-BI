@@ -18,6 +18,8 @@ Do **not** maintain a second `.env` inside `python_app/` — everything loads fr
 
 ## Environment variables (Mongo)
 
+**You do not need any extra env vars** for Streamlit beyond a working Mongo connection. If your `.env` already has `MONGODB_USERNAME`, `MONGODB_PASSWORD`, `MONGODB_CLUSTER`, `MONGODB_DATABASE`, and optionally `MONGODB_APP_NAME` / `MONGODB_AUTH_SOURCE`, that is enough — no separate “app secrets” or JWT variables are required for this Python UI.
+
 Create or edit **`.env`** in the **repository root** (see `.env.example`):
 
 | Variable | Required | Description |
