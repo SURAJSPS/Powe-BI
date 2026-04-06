@@ -7,14 +7,13 @@ from urllib.parse import quote_plus
 
 from dotenv import load_dotenv
 
+# Repository root = one canonical `.env` for Streamlit + any other services (Node API, etc.).
 _ROOT = Path(__file__).resolve().parent.parent
-_APP = Path(__file__).resolve().parent
 
 
 def refresh_env() -> None:
-    """Reload `.env` so password changes apply after save (call before reading Mongo settings)."""
+    """Reload the single project `.env` (repo root) so edits apply without restarting Python."""
     load_dotenv(_ROOT / ".env", override=True)
-    load_dotenv(_APP / ".env", override=True)
 
 
 refresh_env()

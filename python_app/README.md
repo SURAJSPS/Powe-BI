@@ -8,9 +8,17 @@ Browser app with **company onboarding**, **users**, **employees**, **clients**, 
 - **MongoDB** (MongoDB Atlas or self-hosted)  
 - Dependencies: see `requirements.txt`
 
-## Environment variables
+## One `.env` file (single source of truth)
 
-Create a **`.env`** file in the **repository root** (see comments inside that file for all variables):
+Use **one** file only: **`<repository-root>/.env`** (same folder as `README.md` / `.env.example`).
+
+Put **Mongo** variables there for this Streamlit app **and** you can keep your **Node API** variables (`PORT`, `JWT_*`, `CORS`, etc.) in that **same** file. The Python app reads only the Mongo-related keys; it ignores the rest.
+
+Do **not** maintain a second `.env` inside `python_app/` — everything loads from the repo root.
+
+## Environment variables (Mongo)
+
+Create or edit **`.env`** in the **repository root** (see `.env.example`):
 
 | Variable | Required | Description |
 |----------|----------|-------------|

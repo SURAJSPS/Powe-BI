@@ -12,6 +12,8 @@ Documentation and phased specs for civil operations on **Microsoft Dataverse**, 
 | **Excel-only — all phases workbook** | [excel/README.md](excel/README.md) · open `excel/RNK_Civil_Operations_AllPhases.xlsx` |
 | **Python web app (Streamlit + MongoDB + RBAC)** | [python_app/README.md](python_app/README.md) · [docs/PYTHON-APP-REQUIREMENTS.md](docs/PYTHON-APP-REQUIREMENTS.md) |
 
+Configuration: use **one** `.env` at the **repository root** for Mongo (and your API vars if you share the file). See [python_app/README.md](python_app/README.md).
+
 ---
 
 ## Git
