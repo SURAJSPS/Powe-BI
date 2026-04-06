@@ -28,8 +28,11 @@ local.settings.json
 *.log
 npm-debug.log*
 
-# Python venv (Excel generator)
+# Python venv (Excel generator + Streamlit app)
 .venv/
+
+# Local SQLite DB (Python app)
+data/*.db
 
 # Node (if you add tools later)
 node_modules/

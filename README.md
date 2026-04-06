@@ -10,6 +10,7 @@ Documentation and phased specs for civil operations on **Microsoft Dataverse**, 
 | **`pac` unpack / pack** (full walkthrough) | [docs/PAC-SOLUTION-GUIDE.md](docs/PAC-SOLUTION-GUIDE.md) |
 | **Power Apps web portal** (export/import, Solutions — browser only) | [docs/POWER-APPS-WEB-PORTAL.md](docs/POWER-APPS-WEB-PORTAL.md) |
 | **Excel-only — all phases workbook** | [excel/README.md](excel/README.md) · open `excel/RNK_Civil_Operations_AllPhases.xlsx` |
+| **Python web app (Streamlit + SQLite)** | [python_app/README.md](python_app/README.md) |
 
 ---
 
