@@ -41,10 +41,16 @@ def page_payroll_runs(u: dict) -> None:
     c1, c2 = st.columns(2)
     with c1:
         with st.form("pr"):
-            rid = st.text_input("Run ID", value=f"RUN-{datetime.now().strftime('%Y%m')}")
-            pl = st.text_input("Label", value="Apr-2026")
-            a = st.date_input("Start", value=date(2026, 4, 1))
-            b = st.date_input("End", value=date(2026, 4, 30))
+            pr1, pr2 = st.columns(2, gap="medium")
+            with pr1:
+                rid = st.text_input("Run ID", value=f"RUN-{datetime.now().strftime('%Y%m')}")
+            with pr2:
+                pl = st.text_input("Label", value="Apr-2026")
+            pr3, pr4 = st.columns(2, gap="medium")
+            with pr3:
+                a = st.date_input("Start", value=date(2026, 4, 1))
+            with pr4:
+                b = st.date_input("End", value=date(2026, 4, 30))
             if st.form_submit_button("Save run", type="primary", use_container_width=True):
                 civil_store.payroll_run_add(_cid(), {"run_id": rid, "period_label": pl, "period_start": a, "period_end": b, "status": "Draft"})
                 st.rerun()
@@ -52,10 +58,16 @@ def page_payroll_runs(u: dict) -> None:
         runs = [r["run_id"] for r in civil_store.payroll_runs_list(_cid())]
         wids = [w["worker_id"] for w in civil_store.workers_list(_cid())]
         with st.form("pl"):
-            rr = st.selectbox("Run", runs or ["—"])
-            ww = st.selectbox("Worker", wids or ["—"])
-            comp = st.text_input("Component", value="Gross_Est")
-            amt = st.number_input("Amount", value=0.0)
+            pl1, pl2 = st.columns(2, gap="medium")
+            with pl1:
+                rr = st.selectbox("Run", runs or ["—"])
+            with pl2:
+                ww = st.selectbox("Worker", wids or ["—"])
+            pl3, pl4 = st.columns(2, gap="medium")
+            with pl3:
+                comp = st.text_input("Component", value="Gross_Est")
+            with pl4:
+                amt = st.number_input("Amount", value=0.0)
             if st.form_submit_button("Add line", type="primary", use_container_width=True) and runs and wids:
                 civil_store.payroll_line_add(_cid(), {"run_id": rr, "worker_id": ww, "component": comp, "amount": float(amt), "statutory_tag": "Earning"})
                 st.rerun()
@@ -73,20 +85,33 @@ def page_invoices(u: dict) -> None:
     min_d_i, max_d_i = entry_date_window(co_inv or {}, role_inv) if co_inv else (None, None)
     default_inv = clamp_entry_day(date.today(), min_d_i, max_d_i)
     with st.form("inv"):
-        no = st.text_input("Invoice no", value="INV-2026-001")
-        dt_kw: dict = {"label": "Date", "value": default_inv}
-        if min_d_i is not None:
-            dt_kw["min_value"] = min_d_i
-        if max_d_i is not None:
-            dt_kw["max_value"] = max_d_i
-        dt = st.date_input(**dt_kw)
-        pc = st.text_input("Project code", value="PRJ-001")
-        cl = st.text_input("Client name")
-        sub = st.number_input("Subtotal", value=100000.0)
-        cgst = st.number_input("CGST", value=9000.0)
-        sgst = st.number_input("SGST", value=9000.0)
-        igst = st.number_input("IGST", value=0.0)
-        tot = st.number_input("Total", value=118000.0)
+        i1, i2 = st.columns(2, gap="medium")
+        with i1:
+            no = st.text_input("Invoice no", value="INV-2026-001")
+        with i2:
+            dt_kw: dict = {"label": "Date", "value": default_inv}
+            if min_d_i is not None:
+                dt_kw["min_value"] = min_d_i
+            if max_d_i is not None:
+                dt_kw["max_value"] = max_d_i
+            dt = st.date_input(**dt_kw)
+        i3, i4 = st.columns(2, gap="medium")
+        with i3:
+            pc = st.text_input("Project code", value="PRJ-001")
+        with i4:
+            cl = st.text_input("Client name")
+        t1, t2, t3 = st.columns(3, gap="medium")
+        with t1:
+            sub = st.number_input("Subtotal", value=100000.0)
+        with t2:
+            cgst = st.number_input("CGST", value=9000.0)
+        with t3:
+            sgst = st.number_input("SGST", value=9000.0)
+        t4, t5 = st.columns(2, gap="medium")
+        with t4:
+            igst = st.number_input("IGST", value=0.0)
+        with t5:
+            tot = st.number_input("Total", value=118000.0)
         if st.form_submit_button("Save invoice", type="primary", use_container_width=True):
             try:
                 assert_entry_date_allowed(_cid(), dt, role_inv)

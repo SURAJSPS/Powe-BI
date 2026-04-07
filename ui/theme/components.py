@@ -4,13 +4,26 @@ from __future__ import annotations
 import html
 
 import streamlit as st
+from streamlit.delta_generator import DeltaGenerator
+
+
+def pair_columns() -> tuple[DeltaGenerator, DeltaGenerator]:
+    """Two equal columns for side-by-side inputs (gap matches global form-row CSS)."""
+    a, b = st.columns(2, gap="medium")
+    return (a, b)
+
+
+def triple_columns() -> tuple[DeltaGenerator, DeltaGenerator, DeltaGenerator]:
+    """Three equal columns for compact numeric / date rows."""
+    a, b, c = st.columns(3, gap="medium")
+    return (a, b, c)
 
 
 def hero(title: str, subtitle: str | None = None) -> None:
     t = html.escape(title)
     sub = f"<p>{html.escape(subtitle)}</p>" if subtitle else ""
     st.markdown(
-        f'<div class="rnk-hero rnk-hero--dashboard"><div class="rnk-hero__inner"><h1>{t}</h1>{sub}</div></div>',
+        f'<div class="rnk-hero rnk-hero--dashboard rnk-anim-hero"><div class="rnk-hero__inner"><h1>{t}</h1>{sub}</div></div>',
         unsafe_allow_html=True,
     )
 
@@ -27,7 +40,7 @@ def page_header(title: str, subtitle: str | None = None, eyebrow: str | None = N
     if subtitle:
         parts.append(f'<p class="rnk-muted">{html.escape(subtitle)}</p>')
     st.markdown(
-        f'<div class="rnk-page-head" style="margin-bottom:1rem;">{"".join(parts)}</div>',
+        f'<div class="rnk-page-head rnk-anim-reveal" style="margin-bottom:1rem;">{"".join(parts)}</div>',
         unsafe_allow_html=True,
     )
 

@@ -21,10 +21,16 @@ def page_team(u: dict) -> None:
         if u.get("role") == "company_admin":
             with st.expander("Invite app user", expanded=False):
                 with st.form("nu"):
-                    em = st.text_input("Email")
-                    fn = st.text_input("Full name")
-                    pw = st.text_input("Temporary password", type="password")
-                    role = st.selectbox("Role", ROLES, index=min(3, len(ROLES) - 1))
+                    u1, u2 = st.columns(2, gap="medium")
+                    with u1:
+                        em = st.text_input("Email")
+                    with u2:
+                        fn = st.text_input("Full name")
+                    u3, u4 = st.columns(2, gap="medium")
+                    with u3:
+                        pw = st.text_input("Temporary password", type="password")
+                    with u4:
+                        role = st.selectbox("Role", ROLES, index=min(3, len(ROLES) - 1))
                     if st.form_submit_button("Create user", type="primary", use_container_width=True):
                         try:
                             auth_service.add_user(_cid(), em, pw, fn, role)
@@ -41,10 +47,16 @@ def page_team(u: dict) -> None:
         else:
             st.dataframe(df_e, use_container_width=True, hide_index=True)
         with st.form("ne"):
-            code = st.text_input("Employee code", value="EMP-")
-            name = st.text_input("Full name")
-            dept = st.text_input("Department")
-            title = st.text_input("Job title")
+            n1, n2 = st.columns(2, gap="medium")
+            with n1:
+                code = st.text_input("Employee code", value="EMP-")
+            with n2:
+                name = st.text_input("Full name")
+            n3, n4 = st.columns(2, gap="medium")
+            with n3:
+                dept = st.text_input("Department")
+            with n4:
+                title = st.text_input("Job title")
             ph = st.text_input("Phone")
             if st.form_submit_button("Add employee", type="primary", use_container_width=True):
                 civil_store.employee_add(_cid(), code, name, department=dept or None, role_title=title or None, phone=ph or None)

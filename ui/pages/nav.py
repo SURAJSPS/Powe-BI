@@ -19,6 +19,24 @@ from ui.pages.home import page_home
 from ui.pages.operations import page_attendance, page_expenses
 from ui.pages.team import page_team
 
+# Icons for sidebar nav (emoji — consistent with Home “Jump to” quick actions)
+NAV_ICONS: dict[str, str] = {
+    "home": "🏠",
+    "company": "🏢",
+    "team": "👥",
+    "clients": "🤝",
+    "projects": "🏗",
+    "sites": "📍",
+    "workers": "👷",
+    "attendance": "📅",
+    "expenses": "💰",
+    "payroll_est": "📊",
+    "payroll_runs": "📋",
+    "invoices": "🧾",
+    "dashboard": "📈",
+}
+
+
 # map page key -> (title, renderer)
 PAGE_FUNCS: dict[str, tuple[str, Callable[..., None]]] = {
     "home": ("Home", page_home),
@@ -40,6 +58,15 @@ PAGE_FUNCS: dict[str, tuple[str, Callable[..., None]]] = {
 def _nav_label(key: str) -> str:
     """Plain titles — sidebar styling provides hierarchy (no emoji clutter)."""
     return PAGE_FUNCS[key][0]
+
+
+def _nav_icon_label(key: str) -> str:
+    icon = NAV_ICONS.get(key, "◆")
+    return f"{icon}  {_nav_label(key)}"
+
+
+def _set_nav_page(page_key: str) -> None:
+    st.session_state["rnk_nav"] = page_key
 
 
 def _query_param_first(key: str) -> str | None:
@@ -88,10 +115,17 @@ def sidebar_nav(role: str) -> str | None:
         st.session_state["rnk_nav"] = keys[0]
     elif st.session_state["rnk_nav"] not in keys:
         st.session_state["rnk_nav"] = keys[0]
-    return st.sidebar.radio(
-        "Navigate",
-        keys,
-        format_func=_nav_label,
-        label_visibility="collapsed",
-        key="rnk_nav",
-    )
+
+    current = st.session_state["rnk_nav"]
+    with st.sidebar.container():
+        for key in keys:
+            st.button(
+                _nav_icon_label(key),
+                key=f"rnk_nav_btn_{key}",
+                use_container_width=True,
+                type="primary" if key == current else "secondary",
+                on_click=_set_nav_page,
+                args=(key,),
+            )
+
+    return current

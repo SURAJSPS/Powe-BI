@@ -152,6 +152,12 @@ _COMPANY_FIELD_KEYS = frozenset(
         "legal_name",
         "gstin",
         "address",
+        "address_line1",
+        "address_line2",
+        "city",
+        "state",
+        "pincode",
+        "country",
         "bank_account_holder",
         "bank_name",
         "bank_branch",
@@ -167,6 +173,12 @@ _COMPANY_NULLABLE = frozenset(
     {
         "gstin",
         "address",
+        "address_line1",
+        "address_line2",
+        "city",
+        "state",
+        "pincode",
+        "country",
         "bank_account_holder",
         "bank_name",
         "bank_branch",
@@ -182,12 +194,21 @@ def get_company(company_id: str) -> dict[str, Any] | None:
     c = db.companies.find_one({"_id": ObjectId(company_id)})
     if not c:
         return None
+    line1 = c.get("address_line1")
+    if not line1 and isinstance(c.get("address"), str) and (c.get("address") or "").strip():
+        line1 = (c.get("address") or "").strip()
     return {
         "company_id": str(c["_id"]),
         "name": c.get("name", ""),
         "legal_name": c.get("legal_name", ""),
         "gstin": c.get("gstin"),
         "address": c.get("address"),
+        "address_line1": line1,
+        "address_line2": c.get("address_line2"),
+        "city": c.get("city"),
+        "state": c.get("state"),
+        "pincode": c.get("pincode"),
+        "country": c.get("country") or "India",
         "bank_account_holder": c.get("bank_account_holder"),
         "bank_name": c.get("bank_name"),
         "bank_branch": c.get("bank_branch"),

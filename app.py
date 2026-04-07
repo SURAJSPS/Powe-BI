@@ -34,7 +34,7 @@ from ui.pages import (
     publish_nav_to_query_params,
     sidebar_nav,
 )
-from ui.theme import inject_auth_layout, inject_theme, sidebar_avatar_initials
+from ui.theme import inject_auth_layout, inject_theme, inject_ui_animations, sidebar_avatar_initials
 
 st.set_page_config(page_title="RNK Civil", layout="wide", initial_sidebar_state="expanded")
 
@@ -121,14 +121,23 @@ def _auth_screen() -> None:
             )
             with st.form("reg"):
                 st.markdown('<p class="rnk-auth-section-label">Company</p>', unsafe_allow_html=True)
-                cname = st.text_input("Display name", placeholder="e.g. RNK Infratech Pvt Ltd")
-                legal = st.text_input("Legal name (optional)", placeholder="As on GST / incorporation")
+                c1, c2 = st.columns(2, gap="medium")
+                with c1:
+                    cname = st.text_input("Display name", placeholder="e.g. RNK Infratech Pvt Ltd")
+                with c2:
+                    legal = st.text_input("Legal name (optional)", placeholder="As on GST / incorporation")
                 gst = st.text_input("GSTIN (optional)", placeholder="15 characters")
                 st.markdown('<p class="rnk-auth-section-label">Administrator</p>', unsafe_allow_html=True)
-                admin = st.text_input("Full name", placeholder="Primary contact person")
-                email = st.text_input("Work email", placeholder="name@company.com")
-                pw = st.text_input("Password", type="password")
-                pw2 = st.text_input("Confirm password", type="password")
+                a1, a2 = st.columns(2, gap="medium")
+                with a1:
+                    admin = st.text_input("Full name", placeholder="Primary contact person")
+                with a2:
+                    email = st.text_input("Work email", placeholder="name@company.com")
+                p1, p2 = st.columns(2, gap="medium")
+                with p1:
+                    pw = st.text_input("Password", type="password")
+                with p2:
+                    pw2 = st.text_input("Confirm password", type="password")
                 ok = st.form_submit_button("Create company account →", type="primary", use_container_width=True)
             if ok:
                 if not cname or not admin or not email or not pw:
@@ -148,8 +157,11 @@ def _auth_screen() -> None:
                 unsafe_allow_html=True,
             )
             with st.form("login"):
-                em = st.text_input("Email", key="lem", placeholder="you@company.com")
-                pw = st.text_input("Password", type="password", key="lpw")
+                l1, l2 = st.columns(2, gap="medium")
+                with l1:
+                    em = st.text_input("Email", key="lem", placeholder="you@company.com")
+                with l2:
+                    pw = st.text_input("Password", type="password", key="lpw")
                 go = st.form_submit_button("Sign in →", type="primary", use_container_width=True)
             if go:
                 u = auth_service.login(em, pw)
@@ -173,6 +185,7 @@ def main() -> None:
         legacy = st.session_state.pop("rnk_theme", None)
         st.session_state["rnk_dark_toggle"] = legacy == "dark" if legacy is not None else False
     inject_theme("dark" if st.session_state["rnk_dark_toggle"] else "light")
+    inject_ui_animations("dark" if st.session_state["rnk_dark_toggle"] else "light")
 
     ok, detail = mongo.diagnose()
     if not ok:

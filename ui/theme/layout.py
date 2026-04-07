@@ -313,11 +313,8 @@ def inject_theme(theme: str = "light") -> None:
     border: none;
   }
 
-  /* Nav widget: grow so the list scrolls between profile and logout.
-     Streamlit ≥1.40 puts data-baseweb="radio" on *each* option — flex rules on that
-     selector collapse every row to zero height. Target the group root only. */
-  [data-testid="stSidebar"] .block-container [data-testid="element-container"]:has([data-testid="stRadio"]),
-  [data-testid="stSidebar"] .block-container > div:has([data-testid="stRadio"]) {
+  /* Nav stack (icon buttons) — grows and scrolls; second-to-last block = nav container, last = Log out */
+  [data-testid="stSidebar"] .block-container > [data-testid="element-container"]:nth-last-child(2) {
     flex: 1 1 auto !important;
     min-height: 0 !important;
     display: flex !important;
@@ -325,119 +322,68 @@ def inject_theme(theme: str = "light") -> None:
     overflow: hidden !important;
   }
 
-  [data-testid="stSidebar"] .block-container [data-testid="element-container"]:has(.stButton) {
-    flex-shrink: 0 !important;
-    margin-top: auto !important;
-    padding-top: 0.35rem !important;
-  }
-
-  [data-testid="stSidebar"] [data-testid="stRadioGroup"] {
-    gap: 0.15rem !important;
+  [data-testid="stSidebar"] .block-container > [data-testid="element-container"]:nth-last-child(2) [data-testid="stVerticalBlock"] {
+    gap: 0.28rem !important;
     flex: 1 1 auto !important;
     min-height: 0 !important;
     max-height: calc(100vh - 240px) !important;
     overflow-y: auto !important;
     overflow-x: hidden !important;
-    padding: 0.15rem 0.2rem 0.35rem 0 !important;
-    margin: 0 0 0.5rem 0 !important;
+    padding: 0.1rem 0 0.25rem 0 !important;
     -webkit-overflow-scrolling: touch;
   }
 
-  [data-testid="stSidebar"] [data-testid="stRadioGroup"]::-webkit-scrollbar {
+  [data-testid="stSidebar"] .block-container > [data-testid="element-container"]:nth-last-child(2) [data-testid="stVerticalBlock"]::-webkit-scrollbar {
     width: 5px;
   }
-  [data-testid="stSidebar"] [data-testid="stRadioGroup"]::-webkit-scrollbar-thumb {
+  [data-testid="stSidebar"] .block-container > [data-testid="element-container"]:nth-last-child(2) [data-testid="stVerticalBlock"]::-webkit-scrollbar-thumb {
     background: rgba(255, 255, 255, 0.22);
     border-radius: 99px;
   }
-  [data-testid="stSidebar"] [data-testid="stRadioGroup"]::-webkit-scrollbar-track {
-    background: transparent;
+
+  [data-testid="stSidebar"] .block-container > [data-testid="element-container"]:last-child {
+    flex-shrink: 0 !important;
+    margin-top: auto !important;
+    padding-top: 0.35rem !important;
   }
 
-  /* Log out — calm secondary style */
+  /* Sidebar buttons: icon nav (primary = selected, secondary = idle) + Log out */
   [data-testid="stSidebar"] .stButton > button {
     width: 100%;
-    margin-top: auto !important;
     border-radius: 10px !important;
     font-weight: 600 !important;
     font-size: 0.8125rem !important;
     padding: 0.55rem 0.75rem !important;
+    text-align: left !important;
+    justify-content: flex-start !important;
+    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease, box-shadow 0.2s ease !important;
+  }
+
+  [data-testid="stSidebar"] .stButton > button[data-testid="stBaseButton-secondary"] {
     border: 1px solid rgba(255, 255, 255, 0.12) !important;
     background: rgba(0, 0, 0, 0.2) !important;
     color: #e9d5ff !important;
-    transition: background 0.2s ease, border-color 0.2s ease, color 0.2s ease !important;
+    -webkit-text-fill-color: #e9d5ff !important;
+    box-shadow: none !important;
   }
-  [data-testid="stSidebar"] .stButton > button:hover {
+  [data-testid="stSidebar"] .stButton > button[data-testid="stBaseButton-secondary"]:hover {
     background: rgba(255, 255, 255, 0.1) !important;
     border-color: rgba(255, 255, 255, 0.22) !important;
     color: #ffffff !important;
-  }
-
-  /* List-style nav: no visible radio — looks like a menu */
-  [data-testid="stSidebar"] [data-baseweb="radio"] input[type="radio"] {
-    position: absolute !important;
-    opacity: 0 !important;
-    width: 0 !important;
-    height: 0 !important;
-    margin: 0 !important;
-    pointer-events: none !important;
-  }
-
-  [data-testid="stSidebar"] [data-baseweb="radio"] label {
-    display: block !important;
-    margin: 0 !important;
-    padding: 0.55rem 0.65rem 0.55rem 0.85rem !important;
-    border-radius: 9px !important;
-    border: none !important;
-    box-shadow: none !important;
-    font-weight: 500 !important;
-    font-size: 0.8125rem !important;
-    line-height: 1.4 !important;
-    letter-spacing: -0.01em !important;
-    color: #f5f3ff !important;
-    -webkit-text-fill-color: #f5f3ff !important;
-    transition: background 0.15s ease, color 0.15s ease, box-shadow 0.15s ease !important;
-    cursor: pointer !important;
-    position: relative !important;
-  }
-  [data-testid="stSidebar"] [data-baseweb="radio"] label * {
-    color: #f5f3ff !important;
-    -webkit-text-fill-color: #f5f3ff !important;
-  }
-
-  [data-testid="stSidebar"] [data-baseweb="radio"] label:hover {
-    background: rgba(255, 255, 255, 0.06) !important;
-    color: #ffffff !important;
-  }
-  [data-testid="stSidebar"] [data-baseweb="radio"] label:hover * {
-    color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
   }
 
-  [data-testid="stSidebar"] [data-baseweb="radio"] li[aria-checked="true"] label,
-  [data-testid="stSidebar"] [data-baseweb="radio"] label:has(input:checked) {
-    background: rgba(255, 255, 255, 0.12) !important;
+  [data-testid="stSidebar"] .stButton > button[data-testid="stBaseButton-primary"] {
+    border: 1px solid rgba(196, 181, 253, 0.45) !important;
+    background: rgba(255, 255, 255, 0.14) !important;
     color: #ffffff !important;
     -webkit-text-fill-color: #ffffff !important;
-    font-weight: 600 !important;
     box-shadow: inset 3px 0 0 0 #c4b5fd !important;
   }
-  [data-testid="stSidebar"] [data-baseweb="radio"] li[aria-checked="true"] label *,
-  [data-testid="stSidebar"] [data-baseweb="radio"] label:has(input:checked) * {
+  [data-testid="stSidebar"] .stButton > button[data-testid="stBaseButton-primary"]:hover {
+    background: rgba(255, 255, 255, 0.2) !important;
+    border-color: rgba(196, 181, 253, 0.6) !important;
     color: #ffffff !important;
-    -webkit-text-fill-color: #ffffff !important;
-  }
-
-  [data-testid="stSidebar"] [data-baseweb="radio"] li {
-    margin: 0 !important;
-    padding: 0 !important;
-    border: none !important;
-    list-style: none !important;
-  }
-
-  [data-testid="stSidebar"] [data-baseweb="radio"] ul {
-    margin: 0 !important;
-    padding: 0 !important;
   }
 
   :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) h1,
@@ -799,11 +745,77 @@ def inject_theme(theme: str = "light") -> None:
     color: var(--rnk-text) !important;
   }
 
-  /* Modal dialogs (st.dialog) */
-  div[data-testid="stDialog"] > div {
+  /* Modal dialogs (st.dialog) — centered overlay + ~70% panel */
+  div[data-testid="stDialog"] {
+    position: fixed !important;
+    inset: 0 !important;
+    z-index: 100002 !important;
+    display: flex !important;
+    flex-direction: row !important;
+    flex-wrap: nowrap !important;
+    align-items: center !important;
+    justify-content: center !important;
+    padding: clamp(0.5rem, 2vw, 1.25rem) !important;
+    box-sizing: border-box !important;
+    margin: 0 !important;
+    width: 100vw !important;
+    max-width: 100vw !important;
+    min-height: 100vh !important;
+    min-height: 100dvh !important;
+  }
+  div[data-testid="stDialog"] > div,
+  div[data-testid="stDialog"] > [role="dialog"] {
+    width: min(70vw, calc(100vw - 1.5rem)) !important;
+    max-width: min(70vw, calc(100vw - 1.5rem)) !important;
+    min-height: 0 !important;
+    max-height: min(88vh, 960px) !important;
+    overflow-y: auto !important;
+    overflow-x: hidden !important;
+    -webkit-overflow-scrolling: touch;
     border-radius: 16px !important;
     border: 1px solid var(--rnk-border-strong) !important;
     box-shadow: var(--rnk-dialog-shadow) !important;
+    padding: 1rem 1.2rem 1.15rem !important;
+    box-sizing: border-box !important;
+    margin: 0 auto !important;
+    flex-shrink: 0 !important;
+    align-self: center !important;
+  }
+  div[data-testid="stDialog"] .block-container {
+    padding-left: 0 !important;
+    padding-right: 0 !important;
+    max-width: 100% !important;
+  }
+  div[data-testid="stDialog"] .rnk-modal-head {
+    margin: 0 0 0.75rem 0 !important;
+    padding-bottom: 0.6rem !important;
+  }
+  div[data-testid="stDialog"] .rnk-modal-section {
+    margin: 0.85rem 0 0.4rem 0 !important;
+  }
+  div[data-testid="stDialog"] hr {
+    margin: 0.85rem 0 0.65rem 0 !important;
+  }
+  .rnk-modal-grid2 {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 0.5rem 1rem;
+    align-items: start;
+  }
+  @media (max-width: 700px) {
+    .rnk-modal-grid2 {
+      grid-template-columns: 1fr;
+    }
+  }
+  .rnk-modal-callout {
+    margin: 0.5rem 0 0.75rem 0;
+    padding: 0.65rem 0.85rem;
+    border-radius: 10px;
+    border: 1px solid var(--rnk-border-strong);
+    background: var(--rnk-surface2);
+    font-size: 0.82rem;
+    line-height: 1.5;
+    color: var(--rnk-text-muted);
   }
   .rnk-modal-hint {
     font-size: 0.88rem;
@@ -913,6 +925,27 @@ def inject_theme(theme: str = "light") -> None:
     color: var(--rnk-text-muted) !important;
     font-size: 0.82rem !important;
     line-height: 1.45 !important;
+  }
+
+  /* Form rows: side-by-side fields — column gap + no overflow */
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) [data-testid="stHorizontalBlock"] {
+    gap: 0.65rem 1rem !important;
+    align-items: flex-start !important;
+  }
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) [data-testid="column"] {
+    min-width: 0 !important;
+  }
+  /* Slightly richer field chrome inside forms (matches card radius) */
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) [data-testid="stForm"] [data-baseweb="input"],
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) [data-testid="stForm"] [data-baseweb="textarea"] > div {
+    border-radius: 10px !important;
+    box-shadow: 0 1px 2px rgba(15, 23, 42, 0.05) !important;
+  }
+
+  @media (max-width: 640px) {
+    :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+      flex-direction: column !important;
+    }
   }
 
   /* --- Main: labels, inputs, selects, checkboxes, links, code, tables (light/dark via :root) --- */
@@ -1122,6 +1155,24 @@ def inject_auth_layout() -> None:
     align-items: stretch !important;
     gap: clamp(1rem, 3vw, 2rem) !important;
     flex-wrap: nowrap !important;
+  }
+
+  /* Nested columns inside auth forms (register / sign-in field pairs) */
+  :is(section.main, [data-testid="stMain"]):has(.rnk-auth-root) [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+    align-items: flex-start !important;
+    gap: 0.65rem 1rem !important;
+  }
+  :is(section.main, [data-testid="stMain"]):has(.rnk-auth-root) [data-testid="stForm"] [data-testid="column"] {
+    min-width: 0 !important;
+  }
+  :is(section.main, [data-testid="stMain"]):has(.rnk-auth-root) [data-testid="stForm"] [data-baseweb="input"] {
+    border-radius: 10px !important;
+  }
+
+  @media (max-width: 520px) {
+    :is(section.main, [data-testid="stMain"]):has(.rnk-auth-root) [data-testid="stForm"] [data-testid="stHorizontalBlock"] {
+      flex-direction: column !important;
+    }
   }
 
   /* Phone / small tablet: stack — form column first (DOM order: swap visually) */

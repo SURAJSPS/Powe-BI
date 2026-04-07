@@ -31,12 +31,21 @@ def page_attendance(u: dict) -> None:
         if max_d is not None:
             d_kw["max_value"] = max_d
         d = st.date_input(**d_kw)
-        w = st.selectbox("Worker", wids or ["—"])
-        p = st.selectbox("Project", pids or ["—"])
-        s = st.selectbox("Site", sids or ["—"])
-        stt = st.selectbox("Status", ["Present", "Absent", "Leave", "Holiday", "Half-day"])
-        nh = st.number_input("Normal hrs", value=8.0)
-        oh = st.number_input("OT hrs", value=0.0)
+        w1, w2 = st.columns(2, gap="medium")
+        with w1:
+            w = st.selectbox("Worker", wids or ["—"])
+        with w2:
+            p = st.selectbox("Project", pids or ["—"])
+        s1, s2 = st.columns(2, gap="medium")
+        with s1:
+            s = st.selectbox("Site", sids or ["—"])
+        with s2:
+            stt = st.selectbox("Status", ["Present", "Absent", "Leave", "Holiday", "Half-day"])
+        h1, h2 = st.columns(2, gap="medium")
+        with h1:
+            nh = st.number_input("Normal hrs", value=8.0)
+        with h2:
+            oh = st.number_input("OT hrs", value=0.0)
         if st.form_submit_button("Add row", type="primary", use_container_width=True) and wids:
             try:
                 assert_entry_date_allowed(_cid(), d, role)
@@ -68,10 +77,16 @@ def page_expenses(u: dict) -> None:
         if max_d is not None:
             ed_kw["max_value"] = max_d
         ed = st.date_input(**ed_kw)
-        pc = st.selectbox("Project", pids or ["—"])
-        cat = st.text_input("Category", value="Petty cash")
-        amt = st.number_input("Amount", value=0.0)
-        gst = st.number_input("GST", value=0.0)
+        e1, e2 = st.columns(2, gap="medium")
+        with e1:
+            pc = st.selectbox("Project", pids or ["—"])
+        with e2:
+            cat = st.text_input("Category", value="Petty cash")
+        e3, e4 = st.columns(2, gap="medium")
+        with e3:
+            amt = st.number_input("Amount", value=0.0)
+        with e4:
+            gst = st.number_input("GST", value=0.0)
         ven = st.text_input("Vendor")
         ap = st.checkbox("Approved", value=False)
         if st.form_submit_button("Add expense", type="primary", use_container_width=True) and pids:

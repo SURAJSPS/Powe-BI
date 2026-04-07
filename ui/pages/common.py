@@ -80,8 +80,11 @@ def _client_directory_records(rows: list[dict[str, Any]], search: str) -> list[d
                     "name",
                     "legal_name",
                     "client_code",
+                    "address",
+                    "address_line2",
                     "city",
                     "state",
+                    "pincode",
                     "gstin",
                     "contact_person",
                     "email",
@@ -110,7 +113,7 @@ def _client_directory_records(rows: list[dict[str, Any]], search: str) -> list[d
 
 
 def _go_nav(page_key: str) -> None:
-    # Cannot assign to rnk_nav after the sidebar radio (same key) is drawn this run — use pending + apply in sidebar_nav.
+    # Session state for rnk_nav is applied in sidebar_nav before nav buttons render — use pending + apply there.
     st.session_state["rnk_nav_pending"] = page_key
     st.rerun()
 

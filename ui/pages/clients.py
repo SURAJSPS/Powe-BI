@@ -65,10 +65,23 @@ def page_clients(u: dict) -> None:
                 web = st.text_input("Website", placeholder="https://", key="cln_web")
 
             st.markdown("**Location**")
-            addr = st.text_area("Street / address", height=88, key="cln_addr")
+            st.caption("Use the same structure as GST / letterhead: street lines, then city · state · PIN.")
+            a1, a2 = st.columns(2, gap="medium")
+            with a1:
+                addr = st.text_input(
+                    "Address line 1",
+                    placeholder="Building, street, door number",
+                    key="cln_addr",
+                )
+            with a2:
+                addr2 = st.text_input(
+                    "Address line 2 (optional)",
+                    placeholder="Area, landmark, district",
+                    key="cln_addr2",
+                )
             c5, c6, c7 = st.columns(3)
             with c5:
-                city = st.text_input("City", key="cln_city")
+                city = st.text_input("City / town", key="cln_city")
             with c6:
                 st_sel = st.selectbox("State / UT", INDIAN_STATES_UT, key="cln_state_sel")
                 st_free = st.text_input("State (free text if not listed)", key="cln_state_txt")
@@ -103,6 +116,7 @@ def page_clients(u: dict) -> None:
                             billing_email=bem or None,
                             website=web or None,
                             address=addr or None,
+                            address_line2=addr2 or None,
                             city=city or None,
                             state=state_val,
                             pincode=pin or None,
@@ -143,7 +157,13 @@ def page_clients(u: dict) -> None:
                 st_free_val = st_cur
 
             addr_html = (fresh.get("address") or "").strip() or "—"
+            addr2_html = (fresh.get("address_line2") or "").strip()
             notes_html = (fresh.get("notes") or "").strip() or "—"
+            addr_block = html.escape(addr_html[:280]) + ("…" if len(addr_html) > 280 else "")
+            if addr2_html:
+                addr_block += f"<br/><span style='color:#a1a1aa;font-size:0.85rem;'>Line 2</span> {html.escape(addr2_html[:200])}"
+                if len(addr2_html) > 200:
+                    addr_block += "…"
             st.markdown(
                 f'<div class="rnk-card" style="margin-bottom:1rem;">'
                 f"<strong>Snapshot</strong><br/>"
@@ -152,8 +172,7 @@ def page_clients(u: dict) -> None:
                 f"<span style='color:#a1a1aa;font-size:0.85rem;'>Location</span> "
                 f"{html.escape(str(fresh.get('city') or '—'))}, {html.escape(str(fresh.get('state') or '—'))} "
                 f"{html.escape(str(fresh.get('pincode') or ''))}<br/>"
-                f"<span style='color:#a1a1aa;font-size:0.85rem;'>Address</span> {html.escape(addr_html[:280])}"
-                f"{'…' if len(addr_html) > 280 else ''}<br/>"
+                f"<span style='color:#a1a1aa;font-size:0.85rem;'>Address line 1</span> {addr_block}<br/>"
                 f"<span style='color:#a1a1aa;font-size:0.85rem;'>Notes</span> {html.escape(notes_html[:200])}"
                 f"{'…' if len(notes_html) > 200 else ''}"
                 f"</div>",
@@ -194,15 +213,24 @@ def page_clients(u: dict) -> None:
                     e_web = st.text_input("Website", value=fresh.get("website") or "", key=f"cle_web_{oid}")
 
                 st.markdown("**Location**")
-                e_addr = st.text_area(
-                    "Street / address",
-                    value=fresh.get("address") or "",
-                    height=88,
-                    key=f"cle_addr_{oid}",
-                )
+                ea1, ea2 = st.columns(2, gap="medium")
+                with ea1:
+                    e_addr = st.text_input(
+                        "Address line 1",
+                        value=fresh.get("address") or "",
+                        placeholder="Building, street, door number",
+                        key=f"cle_addr_{oid}",
+                    )
+                with ea2:
+                    e_addr2 = st.text_input(
+                        "Address line 2 (optional)",
+                        value=fresh.get("address_line2") or "",
+                        placeholder="Area, landmark, district",
+                        key=f"cle_addr2_{oid}",
+                    )
                 e5, e6, e7 = st.columns(3)
                 with e5:
-                    e_city = st.text_input("City", value=fresh.get("city") or "", key=f"cle_city_{oid}")
+                    e_city = st.text_input("City / town", value=fresh.get("city") or "", key=f"cle_city_{oid}")
                 with e6:
                     e_st_sel = st.selectbox(
                         "State / UT",
@@ -263,6 +291,7 @@ def page_clients(u: dict) -> None:
                                 billing_email=e_bem or None,
                                 website=e_web or None,
                                 address=e_addr or None,
+                                address_line2=e_addr2 or None,
                                 city=e_city or None,
                                 state=e_state_val,
                                 pincode=e_pin or None,

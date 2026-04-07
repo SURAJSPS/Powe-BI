@@ -58,7 +58,7 @@ pip install -r requirements.txt
 ```
 
 ## Run
-
+.venv/bin/python -m streamlit run app.py --server.headless true
 From the **repository root** (where `app.py` and `requirements.txt` live):
 
 ```bash
