@@ -20,6 +20,9 @@ ROLE_LABELS: dict[str, str] = {
     "viewer": "Viewer (read-only)",
 }
 
+# Assignable when inviting a new login (company_admin cannot be created via invite).
+ROLES_INVITABLE: tuple[str, ...] = tuple(r for r in ROLES if r != "company_admin")
+
 # Which sidebar keys each role may access
 PAGE_KEYS: dict[str, FrozenSet[str]] = {
     "company_admin": frozenset(

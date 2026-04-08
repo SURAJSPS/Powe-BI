@@ -13,7 +13,9 @@ def page_home(u: dict) -> None:
     hero("RNK Civil Operations")
     company = html.escape(u.get("company_name", "") or "—")
     role_l = html.escape(ROLE_LABELS.get(u.get("role", ""), u.get("role", "") or "—"))
-    email = html.escape(u.get("email", "") or "—")
+    fn = (u.get("full_name") or "").strip()
+    who = html.escape(fn) if fn else html.escape(u.get("email", "") or "—")
+    who_label = "You" if fn else "Signed in as"
     st.markdown(
         f"""
 <section class="rnk-stat-grid" aria-label="Workspace summary">
@@ -29,8 +31,8 @@ def page_home(u: dict) -> None:
   </article>
   <article class="rnk-stat-tile">
     <span class="rnk-stat-tile__icon" aria-hidden="true">✉️</span>
-    <span class="rnk-stat-tile__label">Signed in as</span>
-    <span class="rnk-stat-tile__value">{email}</span>
+    <span class="rnk-stat-tile__label">{html.escape(who_label)}</span>
+    <span class="rnk-stat-tile__value">{who}</span>
   </article>
 </section>
 """,

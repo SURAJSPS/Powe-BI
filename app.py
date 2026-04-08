@@ -34,6 +34,9 @@ from ui.pages import (
     publish_nav_to_query_params,
     sidebar_nav,
 )
+from ui.pages.field_ops import render_invite_user_modal_if_open
+from ui.pages.quick_add_dialog import render_quick_add_modal_if_open
+from ui.pages.form_ui import required_label, required_legend
 from ui.theme import inject_auth_layout, inject_theme, inject_ui_animations, sidebar_avatar_initials
 
 st.set_page_config(page_title="RNK Civil", layout="wide", initial_sidebar_state="expanded")
@@ -120,29 +123,33 @@ def _auth_screen() -> None:
                 unsafe_allow_html=True,
             )
             with st.form("reg"):
+                required_legend()
                 st.markdown('<p class="rnk-auth-section-label">Company</p>', unsafe_allow_html=True)
                 c1, c2 = st.columns(2, gap="medium")
                 with c1:
-                    cname = st.text_input("Display name", placeholder="e.g. RNK Infratech Pvt Ltd")
+                    required_label("Display name")
+                    cname = st.text_input("Display name", placeholder="e.g. RNK Infratech Pvt Ltd", label_visibility="collapsed")
                 with c2:
                     legal = st.text_input("Legal name (optional)", placeholder="As on GST / incorporation")
                 gst = st.text_input("GSTIN (optional)", placeholder="15 characters")
                 st.markdown('<p class="rnk-auth-section-label">Administrator</p>', unsafe_allow_html=True)
                 a1, a2 = st.columns(2, gap="medium")
                 with a1:
-                    admin = st.text_input("Full name", placeholder="Primary contact person")
+                    required_label("Full name")
+                    admin = st.text_input("Full name", placeholder="Primary contact person", label_visibility="collapsed")
                 with a2:
-                    email = st.text_input("Work email", placeholder="name@company.com")
+                    required_label("Work email")
+                    email = st.text_input("Work email", placeholder="name@company.com", label_visibility="collapsed")
                 p1, p2 = st.columns(2, gap="medium")
                 with p1:
-                    pw = st.text_input("Password", type="password")
+                    required_label("Password")
+                    pw = st.text_input("Password", type="password", label_visibility="collapsed")
                 with p2:
-                    pw2 = st.text_input("Confirm password", type="password")
+                    required_label("Confirm password")
+                    pw2 = st.text_input("Confirm password", type="password", label_visibility="collapsed")
                 ok = st.form_submit_button("Create company account →", type="primary", use_container_width=True)
             if ok:
-                if not cname or not admin or not email or not pw:
-                    st.error("Please fill company name, administrator name, email and password.")
-                elif pw != pw2:
+                if pw != pw2:
                     st.error("Passwords do not match.")
                 else:
                     try:
@@ -157,11 +164,14 @@ def _auth_screen() -> None:
                 unsafe_allow_html=True,
             )
             with st.form("login"):
+                required_legend()
                 l1, l2 = st.columns(2, gap="medium")
                 with l1:
-                    em = st.text_input("Email", key="lem", placeholder="you@company.com")
+                    required_label("Email")
+                    em = st.text_input("Email", key="lem", placeholder="you@company.com", label_visibility="collapsed")
                 with l2:
-                    pw = st.text_input("Password", type="password", key="lpw")
+                    required_label("Password")
+                    pw = st.text_input("Password", type="password", key="lpw", label_visibility="collapsed")
                 go = st.form_submit_button("Sign in →", type="primary", use_container_width=True)
             if go:
                 u = auth_service.login(em, pw)
@@ -226,6 +236,12 @@ Do not commit `.env` to Git.
 
     cname = html.escape(u.get("company_name", "Company") or "Company")
     em = html.escape(u.get("email", "") or "")
+    fn = (u.get("full_name") or "").strip()
+    name_html = (
+        f'<p class="rnk-sidebar-identity__name">{html.escape(fn)}</p>'
+        if fn
+        else ""
+    )
     role = html.escape(ROLE_LABELS.get(u.get("role", ""), str(u.get("role", "") or "")))
     av = sidebar_avatar_initials(u)
     av_e = html.escape(av)
@@ -237,6 +253,7 @@ Do not commit `.env` to Git.
     <div class="rnk-sidebar-identity__main">
       <p class="rnk-sidebar-identity__app">RNK Civil</p>
       <p class="rnk-sidebar-identity__company">{cname}</p>
+      {name_html}
       <p class="rnk-sidebar-identity__email">{em}</p>
       <span class="rnk-sidebar-role-chip">{role}</span>
     </div>
@@ -269,6 +286,12 @@ Do not commit `.env` to Git.
         return
 
     publish_nav_to_query_params(nav)
+
+    render_quick_add_modal_if_open()
+    render_invite_user_modal_if_open()
+    flash = st.session_state.pop("rnk_flash_success", None)
+    if flash:
+        st.success(flash)
 
     _, render = PAGE_FUNCS[nav]
     render(u)

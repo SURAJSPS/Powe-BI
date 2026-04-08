@@ -10,6 +10,7 @@ from bson import ObjectId
 from core.errors import DuplicateError
 from core.security import hash_password, verify_password
 from db.mongo import get_db
+from services.validators import MSG, email as valid_email, optional_text, required_text
 
 logger = logging.getLogger(__name__)
 
@@ -29,15 +30,18 @@ def register_company(
     address: str | None = None,
 ) -> tuple[str, str]:
     db = get_db()
-    email = admin_email.strip().lower()
+    company_name = required_text(company_name, message=MSG["company_name_required"])
+    admin_name = required_text(admin_name, message=MSG["admin_name_required"])
+    email = valid_email(admin_email, required=True)
+    password = required_text(password, message=MSG["password_required"])
     if db.users.find_one({"email": email}):
         logger.info("register_company: duplicate email %s", email)
         raise DuplicateError("An account with this email already exists.")
     comp = {
-        "name": company_name.strip(),
-        "legal_name": (legal_name or company_name).strip(),
-        "gstin": gstin.strip() if gstin else None,
-        "address": address.strip() if address else None,
+        "name": company_name,
+        "legal_name": optional_text(legal_name) or company_name,
+        "gstin": optional_text(gstin),
+        "address": optional_text(address),
         "created_at": _utcnow(),
         "updated_at": _utcnow(),
     }
@@ -46,7 +50,7 @@ def register_company(
     user = {
         "email": email,
         "password_hash": hash_password(password),
-        "full_name": admin_name.strip(),
+        "full_name": admin_name,
         "company_id": cid,
         "role": "company_admin",
         "active": True,
@@ -121,14 +125,16 @@ def add_user(
     role: str,
 ) -> str:
     db = get_db()
-    email = email.strip().lower()
+    email = valid_email(email, required=True)
+    password = required_text(password, message=MSG["password_required"])
+    full_name = required_text(full_name, message=MSG["full_name_required"])
     if db.users.find_one({"email": email}):
         logger.info("add_user: duplicate email %s", email)
         raise DuplicateError("Email already registered.")
     doc = {
         "email": email,
         "password_hash": hash_password(password),
-        "full_name": full_name.strip(),
+        "full_name": full_name,
         "company_id": ObjectId(company_id),
         "role": role,
         "active": True,

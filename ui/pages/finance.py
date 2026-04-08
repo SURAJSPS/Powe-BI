@@ -7,7 +7,8 @@ import pandas as pd
 
 from services import auth_service, civil_store
 from services.entry_policy import assert_entry_date_allowed, clamp_entry_day, entry_date_window
-from ui.pages.common import _cid
+from ui.pages.common import _cid, dataframe_for_records
+from ui.pages.form_ui import required_label, required_legend
 from ui.theme import empty_state
 
 def page_payroll_est(u: dict) -> None:
@@ -26,8 +27,16 @@ def page_payroll_est(u: dict) -> None:
 def page_payroll_runs(u: dict) -> None:
     runs_rows = civil_store.payroll_runs_list(_cid())
     lines_rows = civil_store.payroll_lines_list(_cid())
-    df_r = pd.DataFrame(runs_rows)
-    df_l = pd.DataFrame(lines_rows)
+    wmap = {w["worker_id"]: (w.get("full_name") or "").strip() for w in civil_store.workers_list(_cid())}
+    lines_enriched: list[dict] = []
+    for row in lines_rows:
+        r = dict(row)
+        wid = r.get("worker_id")
+        if wid and wmap.get(wid):
+            r["worker_name"] = wmap[wid]
+        lines_enriched.append(r)
+    df_r = dataframe_for_records(runs_rows)
+    df_l = dataframe_for_records(lines_enriched)
     st.subheader("Runs")
     if df_r.empty:
         empty_state("No payroll runs", "Create a run for a pay period, then add lines.")
@@ -41,11 +50,14 @@ def page_payroll_runs(u: dict) -> None:
     c1, c2 = st.columns(2)
     with c1:
         with st.form("pr"):
+            required_legend()
             pr1, pr2 = st.columns(2, gap="medium")
             with pr1:
-                rid = st.text_input("Run ID", value=f"RUN-{datetime.now().strftime('%Y%m')}")
+                required_label("Run ID")
+                rid = st.text_input("Run ID", value=f"RUN-{datetime.now().strftime('%Y%m')}", label_visibility="collapsed")
             with pr2:
-                pl = st.text_input("Label", value="Apr-2026")
+                required_label("Label")
+                pl = st.text_input("Label", value="Apr-2026", label_visibility="collapsed")
             pr3, pr4 = st.columns(2, gap="medium")
             with pr3:
                 a = st.date_input("Start", value=date(2026, 4, 1))
@@ -58,14 +70,18 @@ def page_payroll_runs(u: dict) -> None:
         runs = [r["run_id"] for r in civil_store.payroll_runs_list(_cid())]
         wids = [w["worker_id"] for w in civil_store.workers_list(_cid())]
         with st.form("pl"):
+            required_legend()
             pl1, pl2 = st.columns(2, gap="medium")
             with pl1:
-                rr = st.selectbox("Run", runs or ["—"])
+                required_label("Run")
+                rr = st.selectbox("Run", runs or ["—"], label_visibility="collapsed")
             with pl2:
-                ww = st.selectbox("Worker", wids or ["—"])
+                required_label("Worker")
+                ww = st.selectbox("Worker", wids or ["—"], label_visibility="collapsed")
             pl3, pl4 = st.columns(2, gap="medium")
             with pl3:
-                comp = st.text_input("Component", value="Gross_Est")
+                required_label("Component")
+                comp = st.text_input("Component", value="Gross_Est", label_visibility="collapsed")
             with pl4:
                 amt = st.number_input("Amount", value=0.0)
             if st.form_submit_button("Add line", type="primary", use_container_width=True) and runs and wids:
@@ -75,7 +91,7 @@ def page_payroll_runs(u: dict) -> None:
 
 def page_invoices(u: dict) -> None:
     inv = civil_store.invoices_list(_cid())
-    df_i = pd.DataFrame(inv)
+    df_i = dataframe_for_records(inv)
     if df_i.empty:
         empty_state("No invoices", "Raise your first invoice when a milestone is ready.")
     else:
@@ -85,9 +101,11 @@ def page_invoices(u: dict) -> None:
     min_d_i, max_d_i = entry_date_window(co_inv or {}, role_inv) if co_inv else (None, None)
     default_inv = clamp_entry_day(date.today(), min_d_i, max_d_i)
     with st.form("inv"):
+        required_legend()
         i1, i2 = st.columns(2, gap="medium")
         with i1:
-            no = st.text_input("Invoice no", value="INV-2026-001")
+            required_label("Invoice no")
+            no = st.text_input("Invoice no", value="INV-2026-001", label_visibility="collapsed")
         with i2:
             dt_kw: dict = {"label": "Date", "value": default_inv}
             if min_d_i is not None:
@@ -97,9 +115,11 @@ def page_invoices(u: dict) -> None:
             dt = st.date_input(**dt_kw)
         i3, i4 = st.columns(2, gap="medium")
         with i3:
-            pc = st.text_input("Project code", value="PRJ-001")
+            required_label("Project code")
+            pc = st.text_input("Project code", value="PRJ-001", label_visibility="collapsed")
         with i4:
-            cl = st.text_input("Client name")
+            required_label("Client name")
+            cl = st.text_input("Client name", label_visibility="collapsed")
         t1, t2, t3 = st.columns(3, gap="medium")
         with t1:
             sub = st.number_input("Subtotal", value=100000.0)
@@ -121,7 +141,7 @@ def page_invoices(u: dict) -> None:
                         "invoice_no": no,
                         "invoice_date": dt,
                         "project_code": pc,
-                        "client_name": cl or "Client",
+                        "client_name": cl,
                         "sub_total": float(sub),
                         "cgst": float(cgst),
                         "sgst": float(sgst),

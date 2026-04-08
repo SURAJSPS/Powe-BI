@@ -7,6 +7,7 @@ from bson import ObjectId
 
 from core.errors import NotFoundError, ValidationError
 from db.mongo import get_db
+from services.validators import MSG, email as valid_email, optional_text, required_text
 
 from ._util import _cid, _utcnow
 from .field import projects_list
@@ -40,20 +41,17 @@ def _client_code_taken(
 
 def client_add(company_id: str, name: str, **extra: Any) -> str:
     db = get_db()
+    name = required_text(name, message=MSG["display_name_required"])
     code = (extra.get("client_code") or "").strip() or None
     if code and _client_code_taken(db, company_id, code):
         raise ValidationError(f"Client code «{code}» is already in use.")
 
     def _s(k: str) -> str | None:
-        v = extra.get(k)
-        if v is None:
-            return None
-        s = str(v).strip()
-        return s or None
+        return optional_text(extra.get(k))
 
     doc = {
         "company_id": _cid(company_id),
-        "name": name.strip(),
+        "name": name,
         "legal_name": _s("legal_name"),
         "client_code": code,
         "gstin": _s("gstin"),
@@ -61,8 +59,8 @@ def client_add(company_id: str, name: str, **extra: Any) -> str:
         "contact_person": _s("contact_person"),
         "phone": _s("phone"),
         "alternate_phone": _s("alternate_phone"),
-        "email": _s("email"),
-        "billing_email": _s("billing_email"),
+        "email": valid_email(extra.get("email"), required=False),
+        "billing_email": valid_email(extra.get("billing_email"), required=False),
         "website": _s("website"),
         "address": _s("address"),
         "address_line2": _s("address_line2"),
@@ -134,8 +132,7 @@ def client_update(company_id: str, client_id: str, **fields: Any) -> None:
         if v is None:
             update[k] = None
         elif isinstance(v, str):
-            s = v.strip()
-            update[k] = s or None
+            update[k] = optional_text(v)
         else:
             update[k] = v
 
@@ -144,6 +141,10 @@ def client_update(company_id: str, client_id: str, **fields: Any) -> None:
 
     if "name" in update:
         update["name"] = update["name"].strip()
+    if "email" in update:
+        update["email"] = valid_email(update.get("email"), required=False)
+    if "billing_email" in update:
+        update["billing_email"] = valid_email(update.get("billing_email"), required=False)
 
     db.clients.update_one({"_id": oid, "company_id": _cid(company_id)}, {"$set": update})
 
@@ -164,14 +165,16 @@ def employee_add(
     email: str | None = None,
 ) -> str:
     db = get_db()
+    employee_code = required_text(employee_code, message="Employee code is required.")
+    full_name = required_text(full_name, message=MSG["full_name_required"])
     doc = {
         "company_id": _cid(company_id),
-        "employee_code": employee_code.strip(),
-        "full_name": full_name.strip(),
-        "department": department,
-        "role_title": role_title,
-        "phone": phone,
-        "email": email,
+        "employee_code": employee_code,
+        "full_name": full_name,
+        "department": optional_text(department),
+        "role_title": optional_text(role_title),
+        "phone": optional_text(phone),
+        "email": valid_email(email, required=False),
         "created_at": _utcnow(),
     }
     return str(db.employees.insert_one(doc).inserted_id)

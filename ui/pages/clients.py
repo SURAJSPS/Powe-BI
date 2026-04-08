@@ -13,6 +13,8 @@ from ui.pages.common import (
     _client_directory_records,
     _client_pick_label,
 )
+from ui.pages.form_ui import required_label, required_legend
+from ui.pages.quick_add_dialog import open_quick_add_modal
 from ui.theme import empty_state
 
 def page_clients(u: dict) -> None:
@@ -26,7 +28,14 @@ def page_clients(u: dict) -> None:
     m3.metric("Projects linked", summ["projects_linked"], help="Projects whose client name matches a client here.")
     m4.metric("All projects", summ["projects_total"])
 
-    tab_dir, tab_add, tab_edit = st.tabs(["Directory", "Add client", "View / edit"])
+    _h1, _h2 = st.columns([4, 1])
+    with _h2:
+        st.markdown('<div style="min-height:2.6rem;"></div>', unsafe_allow_html=True)
+        if st.button("Add client", type="primary", key="cl_page_add_client", help="Same form as Quick add → Client"):
+            open_quick_add_modal("client")
+            st.rerun()
+
+    tab_dir, tab_edit = st.tabs(["Directory", "View / edit"])
 
     with tab_dir:
         q = st.text_input("Search", placeholder="Name, code, city, GSTIN, phone, email…", key="cl_search")
@@ -34,101 +43,13 @@ def page_clients(u: dict) -> None:
         if not recs:
             empty_state(
                 "No matching clients" if rows else "No clients yet",
-                "Adjust search or add a client in the next tab.",
+                "Adjust search or use **Add client** above.",
             )
         else:
             st.dataframe(pd.DataFrame(recs), use_container_width=True, hide_index=True)
         st.caption(
             "Tip: when you create a **Project**, use the same spelling as **Display name** here so «Projects linked» stays accurate."
         )
-
-    with tab_add:
-        with st.form("cl_new"):
-            st.markdown("**Identity**")
-            c1, c2 = st.columns(2)
-            with c1:
-                code = st.text_input("Client code (optional)", placeholder="e.g. CLT-NHAI", key="cln_code")
-                name = st.text_input("Display name *", placeholder="Shown on invoices & projects", key="cln_name")
-            with c2:
-                legal = st.text_input("Legal / registered name", key="cln_legal")
-                pan = st.text_input("PAN (TDS / records)", placeholder="AAAAA0000A", key="cln_pan")
-
-            st.markdown("**Contact**")
-            c3, c4 = st.columns(2)
-            with c3:
-                cp = st.text_input("Contact person", key="cln_cp")
-                ph = st.text_input("Phone", key="cln_ph")
-                ph2 = st.text_input("Alternate phone", key="cln_ph2")
-            with c4:
-                em = st.text_input("Email", key="cln_em")
-                bem = st.text_input("Billing email (if different)", key="cln_bem")
-                web = st.text_input("Website", placeholder="https://", key="cln_web")
-
-            st.markdown("**Location**")
-            st.caption("Use the same structure as GST / letterhead: street lines, then city · state · PIN.")
-            a1, a2 = st.columns(2, gap="medium")
-            with a1:
-                addr = st.text_input(
-                    "Address line 1",
-                    placeholder="Building, street, door number",
-                    key="cln_addr",
-                )
-            with a2:
-                addr2 = st.text_input(
-                    "Address line 2 (optional)",
-                    placeholder="Area, landmark, district",
-                    key="cln_addr2",
-                )
-            c5, c6, c7 = st.columns(3)
-            with c5:
-                city = st.text_input("City / town", key="cln_city")
-            with c6:
-                st_sel = st.selectbox("State / UT", INDIAN_STATES_UT, key="cln_state_sel")
-                st_free = st.text_input("State (free text if not listed)", key="cln_state_txt")
-            with c7:
-                pin = st.text_input("PIN code", key="cln_pin")
-            country = st.text_input("Country", value="India", key="cln_country")
-
-            st.markdown("**Commercial**")
-            c8, c9 = st.columns(2)
-            with c8:
-                gst = st.text_input("GSTIN", placeholder="15 characters", key="cln_gst")
-            with c9:
-                ptd = st.number_input("Payment terms (days)", min_value=0, max_value=365, value=30, step=1, key="cln_ptd")
-            notes = st.text_area("Internal notes", placeholder="Credit limit, portal login, escalation…", height=100, key="cln_notes")
-
-            if st.form_submit_button("Save client", type="primary", use_container_width=True):
-                if not (name or "").strip():
-                    st.error("Display name is required.")
-                else:
-                    state_val = (st_free or "").strip() or (st_sel or "").strip() or None
-                    try:
-                        civil_store.client_add(
-                            cid,
-                            name.strip(),
-                            client_code=code or None,
-                            legal_name=legal or None,
-                            pan=pan or None,
-                            contact_person=cp or None,
-                            phone=ph or None,
-                            alternate_phone=ph2 or None,
-                            email=em or None,
-                            billing_email=bem or None,
-                            website=web or None,
-                            address=addr or None,
-                            address_line2=addr2 or None,
-                            city=city or None,
-                            state=state_val,
-                            pincode=pin or None,
-                            country=country or None,
-                            gstin=gst or None,
-                            payment_terms_days=int(ptd),
-                            notes=notes or None,
-                        )
-                        st.success("Client saved.")
-                        st.rerun()
-                    except ValueError as ex:
-                        st.error(str(ex))
 
     with tab_edit:
         if not rows:
@@ -180,6 +101,7 @@ def page_clients(u: dict) -> None:
             )
 
             with st.form("cl_edit"):
+                required_legend()
                 st.markdown("**Identity**")
                 e1, e2 = st.columns(2)
                 with e1:
@@ -188,10 +110,12 @@ def page_clients(u: dict) -> None:
                         value=fresh.get("client_code") or "",
                         key=f"cle_code_{oid}",
                     )
+                    required_label("Display name")
                     e_name = st.text_input(
                         "Display name *",
                         value=fresh.get("name") or "",
                         key=f"cle_name_{oid}",
+                        label_visibility="collapsed",
                     )
                 with e2:
                     e_legal = st.text_input(

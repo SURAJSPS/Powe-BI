@@ -285,6 +285,14 @@ def inject_theme(theme: str = "light") -> None:
     color: #fafafa !important;
     word-break: break-word;
   }
+  [data-testid="stSidebar"] .rnk-sidebar-identity__name {
+    margin: 0 0 0.45rem 0 !important;
+    font-size: 0.875rem !important;
+    font-weight: 500 !important;
+    line-height: 1.35 !important;
+    color: rgba(250, 250, 250, 0.96) !important;
+    word-break: break-word;
+  }
   [data-testid="stSidebar"] .rnk-sidebar-identity__email {
     margin: 0 0 0.4rem 0 !important;
     font-family: 'JetBrains Mono', ui-monospace, monospace !important;
@@ -690,16 +698,20 @@ def inject_theme(theme: str = "light") -> None:
     font-weight: 600 !important;
     transition: transform 0.15s ease, box-shadow 0.2s ease !important;
   }
-  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="secondary"] {
+  /* Streamlit 1.40+ uses data-testid on buttons; older builds used kind= */
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="secondary"],
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[data-testid="stBaseButton-secondary"] {
     background: var(--rnk-surface) !important;
     border: 1px solid var(--rnk-border-strong) !important;
     color: var(--rnk-text) !important;
   }
-  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="secondary"]:hover {
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="secondary"]:hover,
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[data-testid="stBaseButton-secondary"]:hover {
     border-color: var(--rnk-btn-secondary-hover-border) !important;
     color: var(--rnk-accent) !important;
   }
-  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="primary"] {
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="primary"],
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[data-testid="stBaseButton-primary"] {
     background: var(--rnk-btn-primary-bg) !important;
     border: none !important;
     color: #ffffff !important;
@@ -708,11 +720,46 @@ def inject_theme(theme: str = "light") -> None:
     box-shadow: var(--rnk-btn-primary-shadow) !important;
   }
   @media (hover: hover) {
-    :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="primary"]:hover {
+    :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="primary"]:hover,
+    :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[data-testid="stBaseButton-primary"]:hover {
       transform: translateY(-1px);
       box-shadow: var(--rnk-btn-primary-shadow-hover) !important;
       color: #ffffff !important;
     }
+  }
+
+  /* Table row actions: text-style (tertiary) — no pill chrome */
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="tertiary"],
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[data-testid="stBaseButton-tertiary"] {
+    background: transparent !important;
+    border: none !important;
+    box-shadow: none !important;
+    font-weight: 500 !important;
+    color: var(--rnk-accent) !important;
+    text-decoration: underline;
+    text-underline-offset: 2px;
+    min-height: auto !important;
+    padding: 0.2rem 0.35rem !important;
+    transform: none !important;
+  }
+  @media (hover: hover) {
+    :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[kind="tertiary"]:hover,
+    :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) .stButton > button[data-testid="stBaseButton-tertiary"]:hover {
+      color: var(--rnk-text) !important;
+      background: rgba(0, 0, 0, 0.04) !important;
+    }
+  }
+
+  /* Row menu: more_vert only — hide Streamlit’s trailing caret so Material icon is the sole glyph */
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) [data-testid="stPopover"] > button {
+    min-width: 2.25rem !important;
+    max-width: 2.75rem !important;
+    padding: 0.3rem 0.45rem !important;
+    justify-content: center !important;
+    gap: 0 !important;
+  }
+  :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) [data-testid="stPopover"] > button:has(svg + svg) svg:last-of-type {
+    display: none !important;
   }
 
   :is(section.main, [data-testid="stMain"]):not(:has(.rnk-auth-root)) [data-testid="stMetricContainer"] {
@@ -785,6 +832,24 @@ def inject_theme(theme: str = "light") -> None:
     padding-left: 0 !important;
     padding-right: 0 !important;
     max-width: 100% !important;
+  }
+  /* Native @st.dialog("…") title — centered (single title, no duplicate in-body h3) */
+  div[data-testid="stDialog"] [data-testid="stHeadingWithActions"],
+  div[data-testid="stDialog"] [data-testid="stDialogHeader"] {
+    display: flex !important;
+    flex-wrap: wrap !important;
+    justify-content: center !important;
+    align-items: center !important;
+    text-align: center !important;
+    gap: 0.35rem !important;
+  }
+  div[data-testid="stDialog"] [data-testid="stHeadingWithActions"] h1,
+  div[data-testid="stDialog"] [data-testid="stHeadingWithActions"] h2,
+  div[data-testid="stDialog"] [data-testid="stHeadingWithActions"] h3,
+  div[data-testid="stDialog"] [data-testid="stDialogHeader"] h1,
+  div[data-testid="stDialog"] [data-testid="stDialogHeader"] h2,
+  div[data-testid="stDialog"] [data-testid="stDialogHeader"] h3 {
+    text-align: center !important;
   }
   div[data-testid="stDialog"] .rnk-modal-head {
     margin: 0 0 0.75rem 0 !important;

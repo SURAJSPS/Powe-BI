@@ -7,6 +7,7 @@ from typing import Any
 import pandas as pd
 
 from db.mongo import get_db
+from services.validators import MSG, non_negative, required_text
 
 from ._util import _cid, _utcnow
 
@@ -18,6 +19,8 @@ def payroll_runs_list(company_id: str) -> list[dict[str, Any]]:
 
 def payroll_run_add(company_id: str, d: dict[str, Any]) -> None:
     db = get_db()
+    d["run_id"] = required_text(d.get("run_id"), message=MSG["run_id_required"])
+    d["period_label"] = required_text(d.get("period_label"), message="Payroll period label is required.")
     d = {**d, "company_id": _cid(company_id), "created_at": _utcnow()}
     for k in ("period_start", "period_end"):
         if isinstance(d.get(k), date):
@@ -36,6 +39,10 @@ def payroll_lines_list(company_id: str) -> list[dict[str, Any]]:
 
 def payroll_line_add(company_id: str, d: dict[str, Any]) -> None:
     db = get_db()
+    d["run_id"] = required_text(d.get("run_id"), message=MSG["run_id_required"])
+    d["worker_id"] = required_text(d.get("worker_id"), message=MSG["worker_required"])
+    d["component"] = required_text(d.get("component"), message=MSG["component_required"])
+    d["amount"] = non_negative(d.get("amount") or 0.0)
     d = {**d, "company_id": _cid(company_id), "created_at": _utcnow()}
     db.payroll_lines.insert_one(d)
 
@@ -47,6 +54,14 @@ def invoices_list(company_id: str) -> list[dict[str, Any]]:
 
 def invoice_add(company_id: str, d: dict[str, Any]) -> None:
     db = get_db()
+    d["invoice_no"] = required_text(d.get("invoice_no"), message=MSG["invoice_no_required"])
+    d["project_code"] = required_text(d.get("project_code"), message=MSG["project_required"])
+    d["client_name"] = required_text(d.get("client_name"), message="Client name is required.")
+    d["sub_total"] = non_negative(d.get("sub_total") or 0.0, field_message="Subtotal cannot be negative.")
+    d["cgst"] = non_negative(d.get("cgst") or 0.0, field_message="CGST cannot be negative.")
+    d["sgst"] = non_negative(d.get("sgst") or 0.0, field_message="SGST cannot be negative.")
+    d["igst"] = non_negative(d.get("igst") or 0.0, field_message="IGST cannot be negative.")
+    d["total"] = non_negative(d.get("total") or 0.0, field_message="Total cannot be negative.")
     d = {**d, "company_id": _cid(company_id), "created_at": _utcnow()}
     if isinstance(d.get("invoice_date"), date):
         d["invoice_date"] = d["invoice_date"].isoformat()
